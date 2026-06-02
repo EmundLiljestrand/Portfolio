@@ -48,6 +48,50 @@
     learned:
       'Att bygga ett distribuerat system där två separata backends pratar med varandra tvingade mig att tänka på kontraktsgränser, auth-flöden och felscenarier på ett helt annat sätt än i en monolitisk app. Jag lärde mig också att asynkron arkitektur inte är en optimering — det är ibland ett krav.',
   }
+
+  const coachChatbot = {
+    index: '02',
+    title: 'AI Coach Chatbot',
+    tagline:
+      'En GDPR-medveten AI-chatbot för hälsocoaching med lokal LLM, RAG-sökning och realtids-streaming — utan att en enda personuppgift lämnar servern.',
+    status: ['Local LLM', 'GDPR by design', 'RAG', 'SSE-streaming'],
+    problem:
+      'Probits klienter behövde kunna ställa hälso- och träningsfrågor och få svar från en AI som förstår deras kontext — men hälsodata är känslig. Lösningen fick inte skicka PII till externa API:er, och svaren behövde komma i realtid utan att browsern låste sig.',
+    role:
+      'Byggdes i samarbete med en kollega. Jag var med i alla tekniska beslut och ansvarade för stora delar av implementationen, säkerhetslagret och backend-arkitekturen.',
+    flow: [
+      { title: 'Användaren skickar ett meddelande' },
+      { title: 'AI Safety Middleware körs först', detail: 'anonymiserar PII (telefon, e-post, personnummer) med spaCy, blockerar prompt injection' },
+      { title: 'Anonymiserad text går till RAG-pipelinen', detail: 'embeddings (KBLab Swedish BERT) söker i kunskapsdatabasen via pgvector' },
+      { title: 'Kontext + meddelande skickas till Ollama', detail: 'lokal LLM genererar svaret' },
+      { title: 'Svaret streamar tillbaka via SSE', detail: 'användaren ser texten växa fram i realtid' },
+      { title: 'Färdigt svar postas tillbaka till Probits backend', detail: 'callback / push-arkitektur' },
+    ],
+    challenges: [
+      {
+        title: 'GDPR by design',
+        body: 'PII anonymiseras innan det når LLM:en. Lokal modell innebär att ingen data skickas till OpenAI eller liknande.',
+      },
+      {
+        title: 'SSE-streaming',
+        body: 'Django hanterar inte streaming naturligt. Kräver en custom view utanför DRF:s normala request/response-cykel.',
+      },
+      {
+        title: 'Stateless auth',
+        body: 'Microservicen har ingen egen användartabell. Varje anrop valideras mot Probits backend, vilket eliminerar en hel klass av dataläckage-risker.',
+      },
+      {
+        title: 'Throttling & säkerhet',
+        body: 'Rate limiting per användare, och middleware som blockerar responses som råkar innehålla t.ex. databasconnection-strängar.',
+      },
+    ],
+    stack: [
+      'Python', 'Django', 'Django REST Framework', 'spaCy', 'pgvector',
+      'sentence-transformers', 'Ollama', 'SSE', 'PostgreSQL', 'Docker', 'GitHub Actions',
+    ],
+    learned:
+      'Att säkerhet inte är något man lägger på efteråt. AI Safety Middleware sitter i request/response-kedjan och körs på varje anrop — det designbeslutet krävde att jag förstod Djangos middleware-pipeline på djupet, inte bara hur man bygger en view.',
+  }
 </script>
 
 <section id="projects" class="container">
@@ -56,7 +100,10 @@
     <h2 class="section-title">Vad jag har byggt</h2>
   </header>
 
-  <CaseStudy {...coachAgent} />
+  <div class="case-list">
+    <CaseStudy {...coachAgent} />
+    <CaseStudy {...coachChatbot} />
+  </div>
 </section>
 
 <style>
@@ -66,6 +113,12 @@
 
   .section-head {
     margin-bottom: var(--space-16);
+  }
+
+  .case-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
   }
 
   .section-kicker {
