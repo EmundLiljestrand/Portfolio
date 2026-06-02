@@ -3,7 +3,7 @@
     <p class="eyebrow">Webbutvecklare · Karlstad</p>
 
     <h1 class="name">
-      Emund<br />Liljestrand
+      Emund<br />Liljestrand<span class="cursor" aria-hidden="true">_</span>
     </h1>
 
     <p class="lead">
@@ -81,6 +81,18 @@
     letter-spacing: -0.03em;
     color: var(--text);
     margin-bottom: var(--space-8);
+  }
+
+  .cursor {
+    color: var(--accent);
+    font-weight: 400;
+    margin-left: 0.05em;
+    animation: blink 1.1s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    0%, 50%  { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
   }
 
   .lead {
@@ -178,5 +190,6 @@
       animation: none;
     }
     .scroll-hint span { animation: none; }
+    .cursor { animation: none; }
   }
 </style>

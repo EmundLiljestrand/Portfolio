@@ -1,5 +1,5 @@
 <script>
-  let { index, title, tagline, problem, role, flow, challenges, stack, learned } = $props()
+  let { index, title, tagline, status = [], problem, role, flow, challenges, stack, learned } = $props()
 </script>
 
 <article class="case">
@@ -7,6 +7,14 @@
     <span class="case-index">{index}</span>
     <h3 class="case-title">{title}</h3>
     <p class="case-tagline">{tagline}</p>
+
+    {#if status.length}
+      <ul class="status">
+        {#each status as s}
+          <li class="status-item"><span class="dot"></span>{s}</li>
+        {/each}
+      </ul>
+    {/if}
   </header>
 
   <div class="case-grid">
@@ -93,6 +101,29 @@
     font-size: var(--text-lg);
     color: var(--muted);
     max-width: 60ch;
+  }
+
+  .status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    margin-top: var(--space-6);
+  }
+  .status-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 70%, transparent);
   }
 
   .case-grid {

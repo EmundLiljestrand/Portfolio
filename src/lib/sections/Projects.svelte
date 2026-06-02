@@ -6,6 +6,7 @@
     title: 'AI Coach Agent',
     tagline:
       'En autonom AI-agent som analyserar tränings- och hälsodata och genererar personliga coachmeddelanden — med en coach i beslutsslingan innan något når användaren.',
+    status: ['Deployed', 'GDPR-safe', 'Local LLM', 'Human-in-loop'],
     problem:
       'Probits hälsoplattform har coacher som följer upp klienters veckovisa träning och reflektion. Att skriva personliga, datadrivna meddelanden till varje klient varje vecka tar tid och skalar dåligt. Lösningen behövde vara autonom men inte blind — en coach måste kunna granska och godkänna innan något skickas.',
     role:
