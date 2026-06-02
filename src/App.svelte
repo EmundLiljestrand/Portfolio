@@ -1,8 +1,50 @@
 <script>
+  import { onMount } from 'svelte'
+  import Lenis from 'lenis'
+  import gsap from 'gsap'
+  import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
   import Hero    from './lib/sections/Hero.svelte'
   import Projects from './lib/sections/Projects.svelte'
   import About   from './lib/sections/About.svelte'
   import Contact from './lib/sections/Contact.svelte'
+
+  gsap.registerPlugin(ScrollTrigger)
+
+  onMount(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce) return
+
+    const lenis = new Lenis({
+      duration: 1.1,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    })
+
+    // Lenis och ScrollTrigger delar samma loop
+    lenis.on('scroll', ScrollTrigger.update)
+    const raf = (time) => lenis.raf(time * 1000)
+    gsap.ticker.add(raf)
+    gsap.ticker.lagSmoothing(0)
+
+    // Mjuk scroll vid klick på ankarlänkar (kompenserar för fast nav)
+    const onClick = (e) => {
+      const a = e.target.closest('a[href^="#"]')
+      if (!a) return
+      const id = a.getAttribute('href')
+      if (id.length < 2) return
+      const target = document.querySelector(id)
+      if (!target) return
+      e.preventDefault()
+      lenis.scrollTo(target, { offset: -64 })
+    }
+    document.addEventListener('click', onClick)
+
+    return () => {
+      document.removeEventListener('click', onClick)
+      gsap.ticker.remove(raf)
+      lenis.destroy()
+    }
+  })
 </script>
 
 <nav>

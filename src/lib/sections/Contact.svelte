@@ -1,4 +1,6 @@
 <script>
+  import { reveal } from '../actions/reveal.js'
+
   const email = 'emund.l@hotmail.com'
 
   // TODO: fyll i dina riktiga profiler
@@ -11,7 +13,7 @@
 </script>
 
 <section id="contact" class="container">
-  <div class="contact-inner">
+  <div class="contact-inner" use:reveal>
     <span class="section-kicker">Kontakt</span>
     <h2 class="contact-title">Har du ett problem som behöver lösas?</h2>
     <p class="contact-lead">

@@ -1,4 +1,39 @@
-<section id="hero">
+<script>
+  import { onMount } from 'svelte'
+  import gsap from 'gsap'
+  import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+  gsap.registerPlugin(ScrollTrigger)
+
+  let heroEl
+
+  onMount(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce) return
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: heroEl,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1,
+        },
+      })
+      // Lagren rör sig olika fort = djup
+      tl.to('.glow', { yPercent: 30, ease: 'none' }, 0)
+      tl.to('.hero-inner', { yPercent: 12, opacity: 0.6, ease: 'none' }, 0)
+    }, heroEl)
+
+    return () => ctx.revert()
+  })
+</script>
+
+<section id="hero" bind:this={heroEl}>
+  <div class="hero-bg" aria-hidden="true">
+    <div class="glow"></div>
+  </div>
+
   <div class="container hero-inner">
     <p class="eyebrow">Webbutvecklare · Karlstad</p>
 
@@ -33,9 +68,39 @@
     min-height: calc(100vh - 64px);
     display: flex;
     align-items: center;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+  }
+
+  .glow {
+    position: absolute;
+    top: -20%;
+    left: 50%;
+    width: 70vw;
+    height: 70vw;
+    max-width: 900px;
+    max-height: 900px;
+    transform: translateX(-30%);
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--accent) 11%, transparent) 0%,
+      transparent 60%
+    );
+    filter: blur(40px);
+    will-change: transform;
   }
 
   .hero-inner {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -87,6 +152,7 @@
     color: var(--accent);
     font-weight: 400;
     margin-left: 0.05em;
+    text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 80%, transparent);
     animation: blink 1.1s steps(1) infinite;
   }
 

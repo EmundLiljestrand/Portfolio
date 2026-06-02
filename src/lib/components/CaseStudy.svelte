@@ -1,5 +1,66 @@
 <script>
+  import { onMount } from 'svelte'
+  import gsap from 'gsap'
+  import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+  gsap.registerPlugin(ScrollTrigger)
+
   let { index, title, tagline, status = [], problem, role, flow, challenges, stack, learned } = $props()
+
+  let flowEl
+
+  onMount(() => {
+    const s = getComputedStyle(document.documentElement)
+    const accent = s.getPropertyValue('--accent').trim() || '#4fffb0'
+    const muted = s.getPropertyValue('--muted').trim() || '#6b7280'
+    const border = s.getPropertyValue('--border').trim() || '#1e2130'
+
+    const nodes = flowEl.querySelectorAll('.flow-node')
+    const fills = flowEl.querySelectorAll('.flow-line-fill')
+
+    const active = {
+      borderColor: accent,
+      backgroundColor: accent,
+      color: '#07140d',
+      boxShadow: `0 0 16px ${accent}80`,
+    }
+    const inactive = {
+      borderColor: border,
+      backgroundColor: 'transparent',
+      color: muted,
+      boxShadow: `0 0 0px ${accent}00`,
+    }
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    if (reduce) {
+      // Visa allt i sitt slutläge utan animation
+      gsap.set(nodes, active)
+      gsap.set(fills, { scaleY: 1 })
+      return
+    }
+
+    const ctx = gsap.context(() => {
+      gsap.set(nodes, inactive)
+      gsap.set(fills, { scaleY: 0, transformOrigin: 'top' })
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: flowEl,
+          start: 'top 75%',
+          end: 'bottom 65%',
+          scrub: 1.2,
+        },
+      })
+
+      nodes.forEach((node, i) => {
+        tl.to(node, { ...active, ease: 'none', duration: 1 })
+        if (fills[i]) tl.to(fills[i], { scaleY: 1, ease: 'none', duration: 1.5 })
+      })
+    }, flowEl)
+
+    return () => ctx.revert()
+  })
 </script>
 
 <article class="case">
@@ -30,10 +91,15 @@
 
   <div class="case-block">
     <h4 class="block-label">Så fungerar det</h4>
-    <ol class="flow">
+    <ol class="flow" bind:this={flowEl}>
       {#each flow as step, i}
         <li class="flow-step">
-          <span class="flow-node">{i + 1}</span>
+          <div class="flow-rail">
+            <span class="flow-node">{i + 1}</span>
+            {#if i < flow.length - 1}
+              <span class="flow-line"><span class="flow-line-fill"></span></span>
+            {/if}
+          </div>
           <div class="flow-text">
             <strong>{step.title}</strong>
             {#if step.detail}<span>{step.detail}</span>{/if}
@@ -162,17 +228,17 @@
     display: flex;
     gap: var(--space-4);
     padding-bottom: var(--space-6);
-    position: relative;
+  }
+  .flow-step:last-child {
+    padding-bottom: 0;
   }
 
-  .flow-step:not(:last-child)::before {
-    content: '';
-    position: absolute;
-    left: 15px;
-    top: 32px;
-    bottom: 0;
-    width: 2px;
-    background: var(--border);
+  .flow-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: stretch;
+    flex-shrink: 0;
   }
 
   .flow-node {
@@ -180,19 +246,36 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: 1px solid var(--accent);
-    color: var(--accent);
+    border: 1px solid var(--border);
+    color: var(--muted);
     font-size: var(--text-sm);
     font-family: var(--font-mono);
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--bg);
-    z-index: 1;
+  }
+
+  .flow-line {
+    flex: 1;
+    width: 2px;
+    min-height: var(--space-6);
+    margin-block: 4px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .flow-line-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: top;
   }
 
   .flow-text {
     padding-top: 3px;
+    padding-bottom: var(--space-4);
   }
   .flow-text strong {
     color: var(--text);

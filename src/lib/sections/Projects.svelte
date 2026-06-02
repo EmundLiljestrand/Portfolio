@@ -1,5 +1,6 @@
 <script>
   import CaseStudy from '../components/CaseStudy.svelte'
+  import { reveal } from '../actions/reveal.js'
 
   const coachAgent = {
     index: '01',
@@ -95,7 +96,7 @@
 </script>
 
 <section id="projects" class="container">
-  <header class="section-head">
+  <header class="section-head" use:reveal>
     <span class="section-kicker">Utvalda projekt</span>
     <h2 class="section-title">Vad jag har byggt</h2>
   </header>

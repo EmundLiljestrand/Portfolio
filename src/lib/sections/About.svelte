@@ -1,4 +1,6 @@
 <script>
+  import { reveal } from '../actions/reveal.js'
+
   const skillGroups = [
     {
       label: 'Språk & ramverk',
@@ -20,13 +22,13 @@
 </script>
 
 <section id="about" class="container">
-  <header class="section-head">
+  <header class="section-head" use:reveal>
     <span class="section-kicker">Om mig</span>
     <h2 class="section-title">Problemlösaren i systemet</h2>
   </header>
 
   <div class="about-grid">
-    <div class="about-text">
+    <div class="about-text" use:reveal={{ delay: 0.1 }}>
       <p class="lead">
         Jag är webbutvecklare med en stark frontend-grund i React, TypeScript
         och JavaScript. Under min LIA på Probits hamnade jag djupt i något jag
@@ -47,7 +49,7 @@
       </p>
     </div>
 
-    <div class="about-skills">
+    <div class="about-skills" use:reveal={{ delay: 0.2 }}>
       {#each skillGroups as group}
         <div class="skill-group">
           <h3 class="skill-label">{group.label}</h3>
