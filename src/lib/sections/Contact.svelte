@@ -17,7 +17,7 @@
     <span class="section-kicker">Kontakt</span>
     <h2 class="contact-title">Har du ett problem som behöver lösas?</h2>
     <p class="contact-lead">
-      Jag söker LIA-plats och jobb som utvecklare. Hör gärna av dig — jag svarar
+      Jag söker mitt nästa uppdrag som utvecklare. Hör gärna av dig — jag svarar
       snabbt.
     </p>
 
@@ -38,7 +38,14 @@
 
 <footer class="container">
   <span>© {year} Emund Liljestrand</span>
-  <span class="built">Byggd i Svelte</span>
+  <a
+    class="built"
+    href="https://github.com/EmundLiljestrand/Portfolio"
+    target="_blank"
+    rel="noreferrer"
+  >
+    Byggd i Svelte — se källkoden ↗
+  </a>
 </footer>
 
 <style>
@@ -121,6 +128,13 @@
     font-size: var(--text-xs);
     color: var(--muted);
     letter-spacing: 0.05em;
+  }
+
+  footer .built {
+    transition: color 0.2s;
+  }
+  footer .built:hover {
+    color: var(--accent);
   }
 
   @media (max-width: 480px) {

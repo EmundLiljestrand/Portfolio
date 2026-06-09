@@ -69,6 +69,7 @@
     display: flex;
     align-items: center;
     overflow: hidden;
+    padding-block: var(--space-16);
   }
 
   .hero-bg {
@@ -92,9 +93,10 @@
     background: radial-gradient(
       circle,
       color-mix(in srgb, var(--accent) 11%, transparent) 0%,
-      transparent 60%
+      color-mix(in srgb, var(--accent) 6%, transparent) 30%,
+      color-mix(in srgb, var(--accent) 2%, transparent) 50%,
+      transparent 70%
     );
-    filter: blur(40px);
     will-change: transform;
   }
 
