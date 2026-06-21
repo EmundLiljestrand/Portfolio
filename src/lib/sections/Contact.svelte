@@ -14,14 +14,17 @@
 
 <section id="contact" class="container">
   <div class="contact-inner" use:reveal>
-    <span class="section-kicker">Kontakt</span>
-    <h2 class="contact-title">Har du ett problem som behöver lösas?</h2>
+    <span class="section-kicker pixel">✦ Kontakt</span>
+    <h2 class="contact-title pixel">Har du ett problem<br />som behöver lösas?</h2>
     <p class="contact-lead">
       Jag söker mitt nästa uppdrag som utvecklare. Hör gärna av dig — jag svarar
       snabbt.
     </p>
 
-    <a class="email" href="mailto:{email}">{email}</a>
+    <a class="email frame" href="mailto:{email}">
+      <span class="pixel email-tag">▸ Skicka meddelande</span>
+      <span class="email-addr">{email}</span>
+    </a>
 
     <ul class="links">
       {#each links as link}
@@ -51,24 +54,22 @@
 <style>
   #contact {
     padding-block: var(--space-32);
-    border-top: 1px solid var(--border);
+    border-top: 2px solid var(--border);
   }
 
   .section-kicker {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    letter-spacing: 0.15em;
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--gold);
   }
 
   .contact-title {
-    font-size: clamp(2rem, 5vw, 3.25rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin: var(--space-3) 0 var(--space-6);
+    font-size: clamp(1.25rem, 3.5vw, 2rem);
+    line-height: 1.5;
+    margin: var(--space-4) 0 var(--space-6);
     color: var(--text);
-    max-width: 18ch;
+    text-shadow: 3px 3px 0 var(--bg-sunken);
   }
 
   .contact-lead {
@@ -78,19 +79,29 @@
     margin-bottom: var(--space-12);
   }
 
+  /* Mejl som ett pixel-ramat "dialogval" */
   .email {
-    display: inline-block;
-    font-size: clamp(1.5rem, 4vw, 2.5rem);
-    font-weight: 600;
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-6);
     color: var(--text);
-    letter-spacing: -0.01em;
-    border-bottom: 2px solid var(--border);
-    padding-bottom: var(--space-2);
-    transition: color 0.2s, border-color 0.2s;
+    transition: transform 0.1s steps(2), box-shadow 0.1s;
   }
   .email:hover {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 var(--bg-sunken);
+  }
+  .email-tag {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .email-addr {
+    font-family: var(--font-ui);
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    color: var(--text);
+    letter-spacing: 0.02em;
   }
 
   .links {
@@ -98,21 +109,21 @@
     gap: var(--space-6);
     margin-top: var(--space-12);
   }
-
   .links a {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
+    font-family: var(--font-ui);
+    font-size: var(--text-lg);
+    text-transform: uppercase;
     color: var(--muted);
-    transition: color 0.2s;
+    transition: color 0.15s;
   }
   .links a:hover {
-    color: var(--accent);
+    color: var(--gold);
   }
   .arrow {
-    transition: transform 0.2s;
+    transition: transform 0.1s steps(2);
   }
   .links a:hover .arrow {
     transform: translate(2px, -2px);
@@ -123,24 +134,26 @@
     justify-content: space-between;
     align-items: center;
     padding-block: var(--space-8);
-    border-top: 1px solid var(--border);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
+    border-top: 2px solid var(--border);
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
     color: var(--muted);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
+    background: var(--bg-sunken);
   }
-
   footer .built {
-    transition: color 0.2s;
+    color: var(--muted);
+    transition: color 0.15s;
   }
   footer .built:hover {
-    color: var(--accent);
+    color: var(--gold);
   }
 
   @media (max-width: 480px) {
     footer {
       flex-direction: column;
       gap: var(--space-2);
+      text-align: center;
     }
   }
 </style>

@@ -12,7 +12,10 @@
     if (reduce) return
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
+      gsap.to('.hero-inner', {
+        yPercent: 10,
+        opacity: 0.5,
+        ease: 'none',
         scrollTrigger: {
           trigger: heroEl,
           start: 'top top',
@@ -20,9 +23,6 @@
           scrub: 1,
         },
       })
-      // Lagren rör sig olika fort = djup
-      tl.to('.glow', { yPercent: 30, ease: 'none' }, 0)
-      tl.to('.hero-inner', { yPercent: 12, opacity: 0.6, ease: 'none' }, 0)
     }, heroEl)
 
     return () => ctx.revert()
@@ -30,15 +30,11 @@
 </script>
 
 <section id="hero" bind:this={heroEl}>
-  <div class="hero-bg" aria-hidden="true">
-    <div class="glow"></div>
-  </div>
-
   <div class="container hero-inner">
-    <p class="eyebrow">Webbutvecklare · Karlstad</p>
+    <p class="eyebrow"><span class="arrow">▶</span> Webbutvecklare · Kristinehamn</p>
 
-    <h1 class="name">
-      Emund<br />Liljestrand<span class="cursor" aria-hidden="true">_</span>
+    <h1 class="name pixel">
+      Emund<br />Liljestrand<span class="cursor" aria-hidden="true">▮</span>
     </h1>
 
     <p class="lead">
@@ -46,20 +42,21 @@
     </p>
 
     <p class="body">
-      Under min LIA gick jag från React och JavaScript till produktionssatt
-      AI-infrastruktur: autonoma agenter, GDPR-säkra system och GPU-drift som
-      lever i skarp miljö. <span class="hl">Jag bygger system, inte demos.</span>
+      Nyutexaminerad utvecklare med en envishet jag tagit med mig från
+      tusentals timmar i komplexa system: jag sitter kvar tills det funkar.
+      Under min LIA byggde jag AI-system i produktionsnära miljö —
+      <span class="hl">på riktigt, inte som demos.</span>
     </p>
 
-    <div class="cta">
-      <a href="#projects" class="btn btn-primary">Se mina projekt</a>
-      <a href="#contact" class="btn btn-ghost">Kontakt</a>
-    </div>
+    <nav class="cta" aria-label="Snabbnavigering">
+      <a href="#projects" class="btn btn-primary pixel">Se mina projekt</a>
+      <a href="#contact" class="btn btn-ghost pixel">Kontakt</a>
+    </nav>
   </div>
 
-  <a href="#projects" class="scroll-hint" aria-label="Scrolla till projekt">
-    <span></span>
-  </a>
+  <a href="#projects" class="scroll-hint pixel" aria-label="Scrolla till projekt">▼</a>
+
+  <div class="hero-ground" aria-hidden="true"></div>
 </section>
 
 <style>
@@ -68,36 +65,21 @@
     min-height: calc(100vh - 64px);
     display: flex;
     align-items: center;
-    overflow: hidden;
     padding-block: var(--space-16);
+    overflow: hidden;
   }
 
-  .hero-bg {
+  .hero-ground {
     position: absolute;
-    inset: 0;
-    z-index: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 96px;
+    background: url('/treeline.svg') repeat-x bottom / 120px 96px;
+    image-rendering: pixelated;
+    opacity: 0.9;
     pointer-events: none;
-    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
-  }
-
-  .glow {
-    position: absolute;
-    top: -20%;
-    left: 50%;
-    width: 70vw;
-    height: 70vw;
-    max-width: 900px;
-    max-height: 900px;
-    transform: translateX(-30%);
-    background: radial-gradient(
-      circle,
-      color-mix(in srgb, var(--accent) 11%, transparent) 0%,
-      color-mix(in srgb, var(--accent) 6%, transparent) 30%,
-      color-mix(in srgb, var(--accent) 2%, transparent) 50%,
-      transparent 70%
-    );
-    will-change: transform;
+    z-index: 0;
   }
 
   .hero-inner {
@@ -106,81 +88,76 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    max-width: 820px;
+    max-width: 760px;
   }
 
-  /* Staggered entrance */
   .eyebrow,
   .name,
   .lead,
   .body,
   .cta {
     opacity: 0;
-    transform: translateY(16px);
-    animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    transform: translateY(14px);
+    animation: rise 0.6s steps(8) forwards;
   }
   .eyebrow { animation-delay: 0.05s; }
-  .name    { animation-delay: 0.15s; }
-  .lead    { animation-delay: 0.30s; }
-  .body    { animation-delay: 0.42s; }
-  .cta     { animation-delay: 0.54s; }
+  .name    { animation-delay: 0.18s; }
+  .lead    { animation-delay: 0.34s; }
+  .body    { animation-delay: 0.46s; }
+  .cta     { animation-delay: 0.58s; }
 
   @keyframes rise {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .eyebrow {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    letter-spacing: 0.15em;
+    font-family: var(--font-ui);
+    font-size: var(--text-xl);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--green);
     margin-bottom: var(--space-6);
+  }
+  .eyebrow .arrow {
+    color: var(--gold);
   }
 
   .name {
-    font-size: clamp(2.75rem, 9vw, 5.5rem);
-    line-height: 0.98;
-    font-weight: 700;
-    letter-spacing: -0.03em;
+    font-size: clamp(1.5rem, 4.5vw, 2.75rem);
+    line-height: 1.35;
     color: var(--text);
+    text-shadow: 3px 3px 0 var(--bg-sunken);
     margin-bottom: var(--space-8);
   }
 
   .cursor {
-    color: var(--accent);
-    font-weight: 400;
-    margin-left: 0.05em;
-    text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 80%, transparent);
-    animation: blink 1.1s steps(1) infinite;
+    color: var(--green);
+    margin-left: 0.1em;
+    animation: blink 1s steps(1) infinite;
   }
-
   @keyframes blink {
-    0%, 50%  { opacity: 1; }
+    0%, 50% { opacity: 1; }
     50.01%, 100% { opacity: 0; }
   }
 
   .lead {
-    font-size: clamp(1.25rem, 3vw, 1.75rem);
-    font-weight: 500;
+    font-size: clamp(1.25rem, 2.6vw, 1.625rem);
+    font-style: italic;
     color: var(--text);
     margin-bottom: var(--space-6);
-    max-width: 36ch;
+    max-width: 34ch;
   }
 
   .body {
     font-size: var(--text-lg);
     color: var(--muted);
-    max-width: 56ch;
+    max-width: 58ch;
     margin-bottom: var(--space-12);
   }
 
   .hl {
-    color: var(--text);
-    font-weight: 500;
+    color: var(--gold);
+    font-style: italic;
   }
 
   .cta {
@@ -193,58 +170,44 @@
     display: inline-flex;
     align-items: center;
     padding: var(--space-3) var(--space-6);
-    border-radius: 8px;
-    font-size: var(--text-base);
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease,
-      border-color 0.2s ease, color 0.2s ease;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    border: 2px solid;
+    transition: transform 0.1s steps(2), background 0.1s, color 0.1s;
   }
 
   .btn-primary {
-    background: var(--accent);
-    color: #07140d;
+    background: var(--gold);
+    border-color: var(--gold-dim);
+    color: #20180a;
   }
   .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 30%, transparent);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--bg-sunken);
   }
 
   .btn-ghost {
-    border: 1px solid var(--border);
+    background: transparent;
+    border-color: var(--border-strong);
     color: var(--text);
   }
   .btn-ghost:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+    border-color: var(--green);
+    color: var(--green);
   }
 
-  /* Scroll hint */
   .scroll-hint {
     position: absolute;
     bottom: var(--space-8);
     left: 50%;
     transform: translateX(-50%);
-    width: 26px;
-    height: 42px;
-    border: 2px solid var(--border);
-    border-radius: 14px;
-    display: flex;
-    justify-content: center;
-    padding-top: 8px;
+    color: var(--gold);
+    font-size: var(--text-base);
+    animation: bob 1.6s steps(4) infinite;
   }
-  .scroll-hint span {
-    width: 4px;
-    height: 8px;
-    border-radius: 2px;
-    background: var(--accent);
-    animation: scroll-bob 1.6s ease-in-out infinite;
-  }
-
-  @keyframes scroll-bob {
-    0%   { transform: translateY(0);    opacity: 1; }
-    70%  { transform: translateY(12px); opacity: 0; }
-    100% { transform: translateY(0);    opacity: 0; }
+  @keyframes bob {
+    0%, 100% { transform: translate(-50%, 0); }
+    50%      { transform: translate(-50%, 6px); }
   }
 
   @media (max-width: 640px) {
@@ -257,7 +220,6 @@
       transform: none;
       animation: none;
     }
-    .scroll-hint span { animation: none; }
-    .cursor { animation: none; }
+    .cursor, .scroll-hint { animation: none; }
   }
 </style>

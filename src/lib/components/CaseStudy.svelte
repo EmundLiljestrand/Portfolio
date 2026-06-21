@@ -9,32 +9,39 @@
 
   let flowEl
 
+  // Färgkoda teknik-badges efter roll (RPG-inventory)
+  function techColor(name) {
+    const n = name.toLowerCase()
+    if (/(postgres|mongo|sqlite)/.test(n)) return 'var(--blue)' // databas
+    if (/(langgraph|rag|ollama|spacy|pgvector|sentence|embedding|llama|bert)/.test(n)) return 'var(--berry)' // ai/data
+    if (/(docker|nginx|github actions|safespring|openstack|aws|\bci\b)/.test(n)) return 'var(--gold)' // infra
+    return 'var(--green)' // språk & ramverk
+  }
+
   onMount(() => {
     const s = getComputedStyle(document.documentElement)
-    const accent = s.getPropertyValue('--accent').trim() || '#4fffb0'
-    const muted = s.getPropertyValue('--muted').trim() || '#6b7280'
-    const border = s.getPropertyValue('--border').trim() || '#1e2130'
+    const green = s.getPropertyValue('--green').trim() || '#8bd94e'
+    const muted = s.getPropertyValue('--muted').trim() || '#a8b394'
+    const border = s.getPropertyValue('--border-strong').trim() || '#6a8a4e'
 
     const nodes = flowEl.querySelectorAll('.flow-node')
     const fills = flowEl.querySelectorAll('.flow-line-fill')
 
     const active = {
-      borderColor: accent,
-      backgroundColor: accent,
-      color: '#07140d',
-      boxShadow: `0 0 16px ${accent}80`,
+      borderColor: green,
+      backgroundColor: green,
+      color: '#11260f',
+      boxShadow: `3px 3px 0 ${muted}33`,
     }
     const inactive = {
       borderColor: border,
       backgroundColor: 'transparent',
       color: muted,
-      boxShadow: `0 0 0px ${accent}00`,
+      boxShadow: `0 0 0 ${green}00`,
     }
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
     if (reduce) {
-      // Visa allt i sitt slutläge utan animation
       gsap.set(nodes, active)
       gsap.set(fills, { scaleY: 1 })
       return
@@ -45,16 +52,12 @@
       gsap.set(fills, { scaleY: 0, transformOrigin: 'top' })
 
       const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: flowEl,
-          start: 'top 75%',
-          end: 'bottom 65%',
-          scrub: 1.2,
-        },
+        scrollTrigger: { trigger: flowEl, start: 'top 75%', end: 'bottom 65%', scrub: 1.2 },
       })
 
       nodes.forEach((node, i) => {
-        tl.to(node, { ...active, ease: 'none', duration: 1 })
+        // steps-easing = pixliga "klick" istället för mjuk glidning
+        tl.to(node, { ...active, ease: 'steps(1)', duration: 1 })
         if (fills[i]) tl.to(fills[i], { scaleY: 1, ease: 'none', duration: 1.5 })
       })
     }, flowEl)
@@ -63,10 +66,10 @@
   })
 </script>
 
-<article class="case">
+<article class="case frame">
   <header class="case-head">
-    <span class="case-index">{index}</span>
-    <h3 class="case-title">{title}</h3>
+    <span class="case-index pixel">Quest {index}</span>
+    <h3 class="case-title pixel">{title}</h3>
     <p class="case-tagline">{tagline}</p>
 
     {#if status.length}
@@ -80,22 +83,22 @@
 
   <div class="case-grid">
     <div class="case-block">
-      <h4 class="block-label">Problemet</h4>
+      <h4 class="block-label pixel">▸ Problemet</h4>
       <p>{problem}</p>
     </div>
     <div class="case-block">
-      <h4 class="block-label">Min roll</h4>
+      <h4 class="block-label pixel">▸ Min roll</h4>
       <p>{role}</p>
     </div>
   </div>
 
   <div class="case-block">
-    <h4 class="block-label">Så fungerar det</h4>
+    <h4 class="block-label pixel">▸ Så fungerar det</h4>
     <ol class="flow" bind:this={flowEl}>
       {#each flow as step, i}
         <li class="flow-step">
           <div class="flow-rail">
-            <span class="flow-node">{i + 1}</span>
+            <span class="flow-node pixel">{i + 1}</span>
             {#if i < flow.length - 1}
               <span class="flow-line"><span class="flow-line-fill"></span></span>
             {/if}
@@ -110,7 +113,7 @@
   </div>
 
   <div class="case-block">
-    <h4 class="block-label">Tekniska utmaningar</h4>
+    <h4 class="block-label pixel">▸ Tekniska utmaningar</h4>
     <ul class="challenges">
       {#each challenges as c}
         <li class="challenge">
@@ -122,26 +125,23 @@
   </div>
 
   <div class="case-block">
-    <h4 class="block-label">Teknikstack</h4>
+    <h4 class="block-label pixel">▸ Inventory</h4>
     <ul class="stack">
       {#each stack as tech}
-        <li class="badge">{tech}</li>
+        <li class="badge" style="--c: {techColor(tech)}">{tech}</li>
       {/each}
     </ul>
   </div>
 
   <div class="learned">
-    <h4 class="block-label">Vad jag lärde mig</h4>
+    <h4 class="block-label pixel">★ Vad jag lärde mig</h4>
     <p>{learned}</p>
   </div>
 </article>
 
 <style>
   .case {
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: clamp(1.5rem, 4vw, 3rem);
-    background: var(--bg-raised);
+    padding: clamp(1.5rem, 4vw, 2.75rem);
   }
 
   .case-head {
@@ -149,18 +149,18 @@
   }
 
   .case-index {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    color: var(--accent);
-    letter-spacing: 0.1em;
+    font-size: var(--text-xs);
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   .case-title {
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin: var(--space-2) 0 var(--space-4);
-    color: var(--text);
+    font-size: clamp(1.1rem, 3vw, 1.75rem);
+    line-height: 1.4;
+    margin: var(--space-4) 0 var(--space-4);
+    color: var(--green);
+    text-shadow: 2px 2px 0 var(--bg-sunken);
   }
 
   .case-tagline {
@@ -179,17 +179,17 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: 0.05em;
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     color: var(--muted);
   }
   .dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 70%, transparent);
+    width: 9px;
+    height: 9px;
+    background: var(--green);
+    box-shadow: 2px 2px 0 var(--bg-sunken);
   }
 
   .case-grid {
@@ -204,26 +204,22 @@
   }
 
   .block-label {
-    font-family: var(--font-mono);
     font-size: var(--text-xs);
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    margin-bottom: var(--space-4);
-    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    margin-bottom: var(--space-6);
   }
 
   .case-block > p {
-    color: var(--muted);
+    color: var(--text);
     max-width: 65ch;
   }
 
-  /* Flow */
   .flow {
     display: flex;
     flex-direction: column;
   }
-
   .flow-step {
     display: flex;
     gap: var(--space-4);
@@ -232,7 +228,6 @@
   .flow-step:last-child {
     padding-bottom: 0;
   }
-
   .flow-rail {
     display: flex;
     flex-direction: column;
@@ -240,27 +235,23 @@
     align-self: stretch;
     flex-shrink: 0;
   }
-
   .flow-node {
     flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--border-strong);
     color: var(--muted);
-    font-size: var(--text-sm);
-    font-family: var(--font-mono);
+    font-size: 0.6rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg);
+    background: var(--bg-sunken);
   }
-
   .flow-line {
     flex: 1;
-    width: 2px;
+    width: 3px;
     min-height: var(--space-6);
-    margin-block: 4px;
+    margin-block: 3px;
     background: var(--border);
     position: relative;
     overflow: hidden;
@@ -268,80 +259,84 @@
   .flow-line-fill {
     position: absolute;
     inset: 0;
-    background: var(--accent);
+    background: var(--green);
     transform: scaleY(0);
     transform-origin: top;
   }
-
   .flow-text {
-    padding-top: 3px;
+    padding-top: 4px;
     padding-bottom: var(--space-4);
   }
   .flow-text strong {
     color: var(--text);
-    font-weight: 500;
+    font-weight: 400;
     display: block;
+    font-size: var(--text-lg);
   }
   .flow-text span {
     color: var(--muted);
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
   }
 
-  /* Challenges */
   .challenges {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-6);
   }
-
   .challenge {
-    border-left: 2px solid var(--border);
-    padding-left: var(--space-4);
-    transition: border-color 0.2s;
-  }
-  .challenge:hover {
-    border-left-color: var(--accent);
+    border-left: 4px solid var(--clay);
+    padding: var(--space-2) var(--space-4);
+    background: var(--bg-sunken);
   }
   .challenge strong {
-    color: var(--text);
-    font-weight: 500;
+    color: var(--gold);
+    font-family: var(--font-ui);
+    font-size: var(--text-lg);
+    letter-spacing: 0.03em;
     display: block;
     margin-bottom: var(--space-1);
   }
   .challenge p {
-    color: var(--muted);
-    font-size: var(--text-sm);
+    color: var(--text);
+    font-size: var(--text-base);
   }
 
-  /* Stack badges */
   .stack {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
+    gap: var(--space-2) var(--space-3);
   }
   .badge {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    padding: var(--space-1) var(--space-3);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--muted);
-    transition: color 0.2s, border-color 0.2s;
-  }
-  .badge:hover {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    letter-spacing: 0.03em;
+    padding: 2px var(--space-3);
+    border: 2px solid var(--c);
     color: var(--text);
-    border-color: var(--accent);
+    background: var(--bg-sunken);
+  }
+  .badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--c);
   }
 
-  /* Learned */
   .learned {
-    border-top: 1px solid var(--border);
+    border-top: 2px solid var(--border);
     padding-top: var(--space-8);
+  }
+  .learned .block-label {
+    color: var(--gold);
   }
   .learned p {
     color: var(--text);
     font-size: var(--text-lg);
     max-width: 65ch;
+    font-style: italic;
   }
 
   @media (max-width: 640px) {

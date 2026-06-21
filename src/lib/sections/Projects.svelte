@@ -97,8 +97,8 @@
 
 <section id="projects" class="container">
   <header class="section-head" use:reveal>
-    <span class="section-kicker">Utvalda projekt</span>
-    <h2 class="section-title">Vad jag har byggt</h2>
+    <span class="section-kicker pixel">✦ Quest Log</span>
+    <h2 class="section-title pixel">Vad jag har byggt</h2>
   </header>
 
   <div class="case-list">
@@ -123,18 +123,17 @@
   }
 
   .section-kicker {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    letter-spacing: 0.15em;
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--gold);
   }
 
   .section-title {
-    font-size: clamp(2rem, 5vw, 3rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-top: var(--space-3);
+    font-size: clamp(1.25rem, 3.5vw, 2rem);
+    line-height: 1.4;
+    margin-top: var(--space-4);
     color: var(--text);
+    text-shadow: 3px 3px 0 var(--bg-sunken);
   }
 </style>
