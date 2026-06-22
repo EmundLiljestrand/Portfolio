@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-radius: 0; /* pixlar har inga runda hörn */
+}
+
+:root {
+  /* Färg — SNES/Link-to-the-Past-känsla: rik skogsgrön bas, storybook-accenter */
+  --bg:        #1b3326;  /* rik mossgrön (overworld i skugga) */
+  --bg-raised: #244231;  /* upphöjda ytor (kort, paneler) */
+  --bg-sunken: #122418;  /* nedsänkta ytor */
+  --text:      #f2ecd8;  /* pergament / fantasybok */
+  --muted:     #a8b394;  /* dämpad salvia */
+  --border:    #3c5a40;  /* diskret ram */
+  --border-strong: #6a8a4e;
+
+  /* Accentpalett — varje färg har en roll (RPG-UI), mättade men varma */
+  --green: #8bd94e;  /* natur / Link / "klart" */
+  --gold:  #f7cb4d;  /* skatt / interaktivt / länkar */
+  --gold-dim: #c79a36;
+  --blue:  #5cc2e6;  /* magi / info / vatten */
+  --clay:  #e6794a;  /* värme / emfas / boss */
+  --berry: #b873d6;  /* magi / AI */
+
+  /* Typografi */
+  --font-pixel: 'Press Start 2P', monospace;        /* rubriker/labels — kort text */
+  --font-ui:    'VT323', 'Press Start 2P', monospace;/* små UI-texter, läsbar pixel */
+  --font-body:  Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1.0625rem;
+  --text-lg:   1.1875rem;
+  --text-xl:   1.375rem;
+  --text-2xl:  1.625rem;
+  --text-3xl:  2rem;
+
+  /* Spacing */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* Layout */
+  --max-width: 1080px;
+  --gutter:    clamp(1.25rem, 5vw, 3rem);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 64px; /* fasta navbaren ska inte dölja ankar-/scrollmål */
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Pixelgrafik ska behålla skarpa kanter */
+img, svg {
+  display: block;
+  max-width: 100%;
+  image-rendering: pixelated;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+a {
+  color: var(--gold);
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+/* Pixel-rubriker — Press Start 2P är chunky, så mindre storlek + extra radavstånd */
+.pixel {
+  font-family: var(--font-pixel);
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
+
+/* Tillfällig markering när agenten pekar ut ett element via function calling */
+.agent-pulse {
+  outline: 3px solid transparent;
+  outline-offset: 4px;
+  animation: agent-pulse 0.7s steps(2) 3;
+}
+@keyframes agent-pulse {
+  0%, 100% { outline-color: transparent; }
+  50%      { outline-color: var(--gold); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-pulse { animation: none; outline-color: var(--gold); }
+}
+
+/* Diskret pixel-ram med en inre frame-linje (klassisk fönsterkänsla, inga runda hörn) */
+.frame {
+  border: 2px solid var(--border-strong);
+  box-shadow:
+    inset 0 0 0 2px var(--bg),
+    inset 0 0 0 3px var(--border);
+  background: var(--bg-raised);
+}
