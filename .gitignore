@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Wrangler (lokala dev-artefakter, genereras om)
+.wrangler/
+
 # Secrets 
 .dev.vars
 worker/.dev.vars

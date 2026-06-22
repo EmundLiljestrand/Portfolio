@@ -30,7 +30,8 @@
 </script>
 
 <section id="hero" bind:this={heroEl}>
-  <div class="container hero-inner">
+  <div class="container hero-grid">
+    <div class="hero-inner">
     <p class="eyebrow"><span class="arrow">▶</span> Webbutvecklare · Kristinehamn</p>
 
     <h1 class="name pixel">
@@ -38,23 +39,25 @@
     </h1>
 
     <p class="lead">
-      Jag löser problem — oavsett var i stacken lösningen sitter.
+      Jag löser problem, oavsett var i stacken lösningen sitter.
     </p>
 
     <p class="body">
-      Nyutexaminerad utvecklare med en envishet jag tagit med mig från
-      tusentals timmar i komplexa system: jag sitter kvar tills det funkar.
-      Under min LIA byggde jag AI-system i produktionsnära miljö —
-      <span class="hl">på riktigt, inte som demos.</span>
+      Nyexaminerad webbutvecklare som <span class="hl">inte ger upp förrän
+      koden funkar</span>. Under min LIA dök jag ner i AI och byggde
+      autonoma agenter, RAG-pipelines och lösningar med lokala språkmodeller.
     </p>
 
     <nav class="cta" aria-label="Snabbnavigering">
       <a href="#projects" class="btn btn-primary pixel">Se mina projekt</a>
       <a href="#contact" class="btn btn-ghost pixel">Kontakt</a>
     </nav>
-  </div>
+    </div>
 
-  <a href="#projects" class="scroll-hint pixel" aria-label="Scrolla till projekt">▼</a>
+    <div class="hero-portrait frame">
+      <img src="/emund-portrait.png" alt="Pixelporträtt av Emund Liljestrand" width="300" height="300" />
+    </div>
+  </div>
 
   <div class="hero-ground" aria-hidden="true"></div>
 </section>
@@ -65,7 +68,8 @@
     min-height: calc(100vh - 64px);
     display: flex;
     align-items: center;
-    padding-block: var(--space-16);
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-12);
     overflow: hidden;
   }
 
@@ -77,9 +81,16 @@
     height: 96px;
     background: url('/treeline.svg') repeat-x bottom / 120px 96px;
     image-rendering: pixelated;
-    opacity: 0.9;
+    opacity: 0.6;
     pointer-events: none;
     z-index: 0;
+  }
+
+  .hero-grid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-12);
   }
 
   .hero-inner {
@@ -88,7 +99,19 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    max-width: 760px;
+    flex: 1 1 auto;
+    max-width: 600px;
+  }
+
+  .hero-portrait {
+    flex: 0 0 auto;
+    z-index: 1;
+    padding: var(--space-2);
+    box-shadow: 6px 6px 0 var(--bg-sunken);
+  }
+  .hero-portrait img {
+    width: clamp(200px, 22vw, 290px);
+    height: auto;
   }
 
   .eyebrow,
@@ -116,7 +139,7 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--green);
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-4);
   }
   .eyebrow .arrow {
     color: var(--gold);
@@ -124,10 +147,10 @@
 
   .name {
     font-size: clamp(1.5rem, 4.5vw, 2.75rem);
-    line-height: 1.35;
+    line-height: 1.2;
     color: var(--text);
     text-shadow: 3px 3px 0 var(--bg-sunken);
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
   }
 
   .cursor {
@@ -144,7 +167,7 @@
     font-size: clamp(1.25rem, 2.6vw, 1.625rem);
     font-style: italic;
     color: var(--text);
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-4);
     max-width: 34ch;
   }
 
@@ -152,7 +175,7 @@
     font-size: var(--text-lg);
     color: var(--muted);
     max-width: 58ch;
-    margin-bottom: var(--space-12);
+    margin-bottom: var(--space-8);
   }
 
   .hl {
@@ -196,22 +219,22 @@
     color: var(--green);
   }
 
-  .scroll-hint {
-    position: absolute;
-    bottom: var(--space-8);
-    left: 50%;
-    transform: translateX(-50%);
-    color: var(--gold);
-    font-size: var(--text-base);
-    animation: bob 1.6s steps(4) infinite;
-  }
-  @keyframes bob {
-    0%, 100% { transform: translate(-50%, 0); }
-    50%      { transform: translate(-50%, 6px); }
+  @media (max-width: 820px) {
+    .hero-grid {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-8);
+    }
+    .hero-portrait {
+      order: -1;
+      align-self: center;
+    }
+    .hero-portrait img { width: clamp(180px, 45vw, 230px); }
   }
 
   @media (max-width: 640px) {
-    .scroll-hint { display: none; }
+    .hero-ground { display: none; }
+    .eyebrow { font-size: var(--text-base); }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -220,6 +243,6 @@
       transform: none;
       animation: none;
     }
-    .cursor, .scroll-hint { animation: none; }
+    .cursor { animation: none; }
   }
 </style>

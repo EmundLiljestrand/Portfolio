@@ -8,7 +8,7 @@
   let messages = $state([]) // { role: 'user' | 'assistant' | 'system', text }
 
   let history = [] // Claude API-format — klienten äger loopen
-  let listEl
+  let listEl = $state()
 
   onMount(async () => {
     try {
@@ -25,6 +25,15 @@
     })
   }
 
+  const PROJECT_IDS = { chatbot: 'project-chatbot', agent: 'project-agent' }
+  const PROJECT_NAMES = { chatbot: 'AI Coach Chatbot', agent: 'AI Coach Agent' }
+  const SKILL_NAMES = {
+    languages: 'Språk & ramverk',
+    ai: 'AI & Data',
+    infra: 'Infrastruktur & drift',
+    databases: 'Databaser',
+  }
+
   function toolFlavor(name, input) {
     if (name === 'scroll_to_section') {
       const map = {
@@ -34,6 +43,12 @@
         contact: 'kontaktrutan',
       }
       return `▸ Bläddrar till ${map[input?.section] ?? input?.section}...`
+    }
+    if (name === 'highlight_project') {
+      return `▸ Pekar ut ${PROJECT_NAMES[input?.project] ?? input?.project}...`
+    }
+    if (name === 'show_skills') {
+      return `▸ Öppnar ${SKILL_NAMES[input?.category] ?? input?.category} i ryggsäcken...`
     }
     return '▸ Letar i ryggsäcken...'
   }
@@ -46,6 +61,22 @@
         return `Scrollade till ${input.section}.`
       }
       return 'Sektionen hittades inte.'
+    }
+    if (name === 'highlight_project') {
+      const id = PROJECT_IDS[input?.project]
+      if (id && document.getElementById(id)) {
+        window.dispatchEvent(new CustomEvent('agent:highlight', { detail: id }))
+        return `Markerade projektet ${input.project}.`
+      }
+      return 'Projektet hittades inte.'
+    }
+    if (name === 'show_skills') {
+      const id = `skill-${input?.category}`
+      if (document.getElementById(id)) {
+        window.dispatchEvent(new CustomEvent('agent:highlight', { detail: id }))
+        return `Lyfte fram kompetensgruppen ${input.category}.`
+      }
+      return 'Kompetensgruppen hittades inte.'
     }
     return `Okänt verktyg: ${name}`
   }
@@ -123,12 +154,26 @@
     return done.stop_reason
   }
 
+  // Workern tar max 24 meddelanden. Håll klientens historik under det med
+  // marginal för en rundas tool-utbyten, annars låser sig chatten efter en
+  // handfull frågor. Fönstret måste börja på en riktig användarfråga, aldrig
+  // mitt i ett tool_use/tool_result-par (det ger API-fel).
+  const MAX_HISTORY = 16
+  function trimHistory() {
+    if (history.length <= MAX_HISTORY) return
+    history = history.slice(-MAX_HISTORY)
+    while (history.length && !(history[0].role === 'user' && typeof history[0].content === 'string')) {
+      history.shift()
+    }
+  }
+
   async function send() {
     const text = draft.trim()
     if (!text || busy) return
     draft = ''
     busy = true
 
+    trimHistory()
     messages.push({ role: 'user', text })
     history.push({ role: 'user', content: text })
     scrollChatToBottom()
@@ -141,7 +186,7 @@
     } catch (err) {
       messages.push({
         role: 'system',
-        text: `${err.message} Maila gärna istället — se kontaktrutan.`,
+        text: `${err.message} Maila gärna istället, se kontaktrutan.`,
       })
     } finally {
       busy = false
@@ -154,6 +199,19 @@
       e.preventDefault()
       send()
     }
+  }
+
+  // Startfrågor i tomma rutan: tar bort "blank ruta"-tröskeln och guidar besökaren
+  const starters = [
+    'Vad har Emund byggt?',
+    'Vilka kompetenser har han?',
+    'Berätta om hans bakgrund',
+    'Hur når jag honom?',
+  ]
+  function ask(q) {
+    if (busy) return
+    draft = q
+    send()
   }
 </script>
 
@@ -181,13 +239,18 @@
           <button class="close pixel" onclick={() => (open = false)} aria-label="Stäng">✕</button>
         </header>
 
-        <div class="list" bind:this={listEl}>
+        <div class="list" bind:this={listEl} data-lenis-prevent>
           {#if messages.length === 0}
             <p class="intro">
-              Välkommen, vandrare. Jag är en följeslagare som Emund byggt — fråga
+              Välkommen, vandrare. Jag är en följeslagare som Emund byggt. Fråga
               mig om hans quests (projekt), hans bakgrund eller kompetenser, så
               visar jag dig runt i äventyret.
             </p>
+            <div class="starters">
+              {#each starters as s}
+                <button type="button" class="starter" onclick={() => ask(s)}>{s}</button>
+              {/each}
+            </div>
           {/if}
           {#each messages as m}
             {#if m.role === 'system'}
@@ -306,6 +369,7 @@
   .list {
     flex: 1;
     overflow-y: auto;
+    overscroll-behavior: contain; /* scrollen ska inte "läcka" ut i sidan vid kanterna */
     padding: var(--space-4);
     display: flex;
     flex-direction: column;
@@ -317,6 +381,33 @@
 
   .intro {
     color: var(--muted);
+  }
+
+  .starters {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+  .starter {
+    text-align: left;
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    letter-spacing: 0.02em;
+    color: var(--text);
+    background: var(--bg-sunken);
+    border: 2px solid var(--border-strong);
+    padding: var(--space-2) var(--space-3);
+    cursor: pointer;
+    transition: border-color 0.1s, color 0.1s;
+  }
+  .starter::before {
+    content: '▸ ';
+    color: var(--gold);
+  }
+  .starter:hover {
+    border-color: var(--gold);
+    color: var(--gold);
   }
 
   .msg {

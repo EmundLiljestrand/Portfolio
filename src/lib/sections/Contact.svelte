@@ -3,9 +3,8 @@
 
   const email = 'emund.l@hotmail.com'
 
-  // TODO: fyll i dina riktiga profiler
   const links = [
-    { label: 'LinkedIn', href: 'https://linkedin.com/in/DITT-ANVÄNDARNAMN' },
+    { label: 'LinkedIn', href: 'https://se.linkedin.com/in/emund-lorch-falch-liljestrand-1b2b77311' },
     { label: 'GitHub', href: 'https://github.com/EmundLiljestrand' },
   ]
 
@@ -15,10 +14,10 @@
 <section id="contact" class="container">
   <div class="contact-inner" use:reveal>
     <span class="section-kicker pixel">✦ Kontakt</span>
-    <h2 class="contact-title pixel">Har du ett problem<br />som behöver lösas?</h2>
+    <h2 class="contact-title pixel">Hör av dig</h2>
     <p class="contact-lead">
-      Jag söker mitt nästa uppdrag som utvecklare. Hör gärna av dig — jag svarar
-      snabbt.
+      Jag är öppen för nya uppdrag och svarar snabbt. Gäller det ett jobb eller
+      bara en fråga? Skriv en rad, så hörs vi.
     </p>
 
     <a class="email frame" href="mailto:{email}">
@@ -47,7 +46,7 @@
     target="_blank"
     rel="noreferrer"
   >
-    Byggd i Svelte — se källkoden ↗
+    Byggd i Svelte · se källkoden ↗
   </a>
 </footer>
 

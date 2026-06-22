@@ -24,8 +24,25 @@
     }
     window.addEventListener('agent:scroll-to', onAgentScroll)
 
+    // Agenten kan peka ut ett specifikt element: scrolla dit och pulsa det kort
+    const onAgentHighlight = (e) => {
+      const target = document.getElementById(e.detail)
+      if (!target) return
+      scrollTo(target)
+      target.classList.remove('agent-pulse')
+      void target.offsetWidth // tvinga reflow så animationen kan starta om
+      target.classList.add('agent-pulse')
+      setTimeout(() => target.classList.remove('agent-pulse'), 2400)
+    }
+    window.addEventListener('agent:highlight', onAgentHighlight)
+
+    const removeAgentListeners = () => {
+      window.removeEventListener('agent:scroll-to', onAgentScroll)
+      window.removeEventListener('agent:highlight', onAgentHighlight)
+    }
+
     if (reduce) {
-      return () => window.removeEventListener('agent:scroll-to', onAgentScroll)
+      return removeAgentListeners
     }
 
     const lenis = new Lenis({
@@ -55,7 +72,7 @@
     document.addEventListener('click', onClick)
 
     return () => {
-      window.removeEventListener('agent:scroll-to', onAgentScroll)
+      removeAgentListeners()
       document.removeEventListener('click', onClick)
       gsap.ticker.remove(raf)
       lenis.destroy()

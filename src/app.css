@@ -57,6 +57,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 64px; /* fasta navbaren ska inte dölja ankar-/scrollmål */
   color-scheme: dark;
 }
 
@@ -98,6 +99,20 @@ ul, ol {
   font-family: var(--font-pixel);
   line-height: 1.5;
   letter-spacing: 0.02em;
+}
+
+/* Tillfällig markering när agenten pekar ut ett element via function calling */
+.agent-pulse {
+  outline: 3px solid transparent;
+  outline-offset: 4px;
+  animation: agent-pulse 0.7s steps(2) 3;
+}
+@keyframes agent-pulse {
+  0%, 100% { outline-color: transparent; }
+  50%      { outline-color: var(--gold); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-pulse { animation: none; outline-color: var(--gold); }
 }
 
 /* Diskret pixel-ram med en inre frame-linje (klassisk fönsterkänsla, inga runda hörn) */

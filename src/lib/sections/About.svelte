@@ -3,21 +3,25 @@
 
   const skillGroups = [
     {
+      key: 'languages',
       label: 'Språk & ramverk',
       color: 'var(--green)',
       items: ['JavaScript', 'TypeScript', 'React', 'Svelte', 'Python', 'Django', 'Node.js', 'Express', 'HTML/CSS'],
     },
     {
+      key: 'ai',
       label: 'AI & Data',
       color: 'var(--berry)',
       items: ['LangGraph', 'RAG', 'Embeddings', 'Local LLMs (Ollama)', 'spaCy', 'pgvector'],
     },
     {
+      key: 'infra',
       label: 'Infrastruktur & drift',
       color: 'var(--gold)',
       items: ['Docker', 'Nginx', 'GitHub Actions', 'Safespring (OpenStack)', 'AWS'],
     },
     {
+      key: 'databases',
       label: 'Databaser',
       color: 'var(--blue)',
       items: ['PostgreSQL', 'MongoDB', 'Supabase', 'DynamoDB'],
@@ -34,36 +38,45 @@
 
     <div class="about-grid">
       <div class="about-text" use:reveal={{ delay: 0.1 }}>
+        <img
+          class="about-img frame"
+          src="/emund-desk.png"
+          alt="Pixelillustration av Emund vid en retrodator"
+          width="220"
+          height="220"
+        />
         <p class="lead">
-          Jag är webbutvecklare med en stark frontend-grund i React, TypeScript
-          och JavaScript. Under min LIA på Probits hamnade jag djupt i något jag
-          inte visste att jag skulle fastna för: backend-arkitektur och AI-system.
+          Jag är webbutvecklare med en frontend-grund i React, TypeScript och
+          JavaScript. Under min LIA på Probits hamnade jag i något jag inte
+          visste att jag skulle fastna för: backend-arkitektur och AI-system.
         </p>
 
         <p>
-          Jag kom dit med JavaScript och React. Jag lämnade med produktionssatt
-          GPU-infrastruktur, autonoma AI-agenter och en förståelse för hur
-          distribuerade system faktiskt fungerar — autentisering, asynkrona köer,
-          kontraktsgränser mellan tjänster och GDPR-krav som styr arkitekturval.
+          Jag började med JavaScript och React. Sedan dess har jag lärt mig att
+          bygga autonoma AI-agenter, köra lokala språkmodeller på GPU och förstå
+          hur ett större system faktiskt fungerar: inloggning och säkerhet,
+          asynkrona köer, hur olika tjänster pratar med varandra, och GDPR-krav
+          som formar hela arkitekturen.
         </p>
 
         <p>
-          Jag har aldrig varit en naturbegåvning som tar saker på studs — men jag
-          ger mig inte. Genom att nöta, göra fel och försöka igen tar jag mig
-          dit. Samma envishet bar mig genom hundratals timmar i komplexa system,
-          och den tar jag med mig till varje kodbas.
+          Det jag drivs av är att förstå hela bilden och veta varför något
+          fungerar, inte bara att få det att gå. Helst sitter jag med problem
+          som spänner över flera lager och kräver att man ser hur delarna spelar
+          ihop.
         </p>
 
         <p>
-          Innan jag kodade jobbade jag som fibertekniker. Det lärde mig att
-          felsöka logiska system i skarpt läge, utan facit och ofta ensam.
+          Nu söker jag mitt nästa kliv som utvecklare. Jag är öppen för det mesta
+          och vill framför allt fortsätta växa och lösa riktiga problem. Att få
+          jobba mer med AI lockar, men det är ett plus snarare än ett krav.
         </p>
       </div>
 
       <div class="about-skills frame" use:reveal={{ delay: 0.2 }}>
         <span class="inv-title pixel">▸ Inventory</span>
         {#each skillGroups as group}
-          <div class="skill-group">
+          <div class="skill-group" id="skill-{group.key}">
             <h3 class="skill-label" style="--c: {group.color}">{group.label}</h3>
             <ul class="skill-list">
               {#each group.items as item}
@@ -122,6 +135,19 @@
   }
   .about-text p:last-child {
     margin-bottom: 0;
+  }
+
+  .about-img {
+    float: left;
+    width: clamp(150px, 32%, 210px);
+    margin: 0 var(--space-6) var(--space-4) 0;
+    padding: var(--space-2);
+    box-shadow: 5px 5px 0 var(--bg-sunken);
+  }
+  @media (max-width: 640px) {
+    .about-img {
+      display: none;
+    }
   }
 
   .about-skills {

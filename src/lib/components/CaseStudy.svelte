@@ -5,7 +5,7 @@
 
   gsap.registerPlugin(ScrollTrigger)
 
-  let { index, title, tagline, status = [], problem, role, flow, challenges, stack, learned } = $props()
+  let { id, index, title, tagline, status = [], problem, role, flow, challenges, stack, learned } = $props()
 
   let flowEl
 
@@ -66,7 +66,7 @@
   })
 </script>
 
-<article class="case frame">
+<article {id} class="case frame">
   <header class="case-head">
     <span class="case-index pixel">Quest {index}</span>
     <h3 class="case-title pixel">{title}</h3>

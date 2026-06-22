@@ -3,22 +3,23 @@
   import { reveal } from '../actions/reveal.js'
 
   const coachAgent = {
-    index: '01',
+    id: 'project-agent',
+    index: '02',
     title: 'AI Coach Agent',
     tagline:
-      'En autonom AI-agent som analyserar tränings- och hälsodata och genererar personliga coachmeddelanden — med en coach i beslutsslingan innan något når användaren.',
-    status: ['Deployed', 'GDPR-safe', 'Local LLM', 'Human-in-loop'],
+      'En autonom AI-agent som analyserar tränings- och hälsodata och genererar personliga coachmeddelanden, med en coach i beslutsslingan innan något når användaren.',
+    status: ['Async pipeline', 'GDPR-safe', 'Local LLM', 'Human-in-loop'],
     problem:
-      'Probits hälsoplattform har coacher som följer upp klienters veckovisa träning och reflektion. Att skriva personliga, datadrivna meddelanden till varje klient varje vecka tar tid och skalar dåligt. Lösningen behövde vara autonom men inte blind — en coach måste kunna granska och godkänna innan något skickas.',
+      'Probits ville kunna ge användare personliga, datadrivna coachmeddelanden varje vecka, utan att en coach skulle behöva skriva varje meddelande för hand. Men det fick inte ske helt på egen hand: en coach måste kunna läsa igenom och godkänna varje meddelande innan det går ut till användaren.',
     role:
-      'Designade och implementerade hela agentpipelinen och backend-API:et. Byggdes i samarbete med en kollega — jag ansvarade för agentlogik, arkitektur och majoriteten av implementationen.',
+      'Jag byggde agenten från grunden: agentlogiken, arkitekturen och backend-API:et.',
     flow: [
       { title: 'Användaren sparar sin veckoreflektion i appen' },
       { title: 'Probits backend skickar en payload till microservicen', detail: 'via HTTP-trigger' },
       { title: 'Django-Q lägger jobbet på en asynkron kö', detail: 'och svarar 202 direkt' },
       { title: 'En bakgrundsworker kör LangGraph-agenten', detail: 'analyze_week → generate_draft (Ollama, llama3.1:8b)' },
       { title: 'Draften sparas som PENDING i databasen' },
-      { title: 'Coachen granskar, redigerar och godkänner', detail: 'callback → meddelandet sparas i klientens chatt' },
+      { title: 'Coachen granskar, redigerar och godkänner', detail: 'callback → meddelandet sparas i användarens chatt' },
     ],
     challenges: [
       {
@@ -27,7 +28,7 @@
       },
       {
         title: 'IDOR-säkerhet',
-        body: 'En coach får bara se sina egna klienters drafts. Token-validering mot Probits backend som returnerar managed_user_ids per anrop. Microservicen har ingen egen användartabell.',
+        body: 'En coach får bara se drafts för sina egna användare. Token-validering mot Probits backend som returnerar managed_user_ids per anrop. Microservicen har ingen egen användartabell.',
       },
       {
         title: 'Asynkron pipeline',
@@ -35,11 +36,11 @@
       },
       {
         title: 'Felhantering',
-        body: 'Ollama-anrop har retry med backoff, payload valideras tidigt i kedjan, och IntegrityError vid race condition hanteras gracefully.',
+        body: 'Ollama-anrop har retry med backoff, payload valideras tidigt i kedjan, och IntegrityError vid race condition hanteras kontrollerat.',
       },
       {
         title: 'Deployment',
-        body: 'Dockeriserad stack (6 containers) på Safespring GPU-VM med Nvidia A2. LLM:en kör helt lokalt — ingen data lämnar servern.',
+        body: 'Dockeriserad stack (6 containers) på Safespring GPU-VM med Nvidia A2. LLM:en kör helt lokalt, så ingen data lämnar servern.',
       },
     ],
     stack: [
@@ -47,22 +48,23 @@
       'Django-Q2', 'PostgreSQL', 'Docker', 'Safespring (OpenStack)', 'REST API', 'GitHub Actions',
     ],
     learned:
-      'Att bygga ett distribuerat system där två separata backends pratar med varandra tvingade mig att tänka på kontraktsgränser, auth-flöden och felscenarier på ett helt annat sätt än i en monolitisk app. Jag lärde mig också att asynkron arkitektur inte är en optimering — det är ibland ett krav.',
+      'Här byggde jag ett system där två separata tjänster pratar med varandra, vilket tvingade mig att tänka mer på hur de kommunicerar säkert och vad som händer när något går fel mitt i kedjan. Jag lärde mig också varför tunga jobb måste köras i bakgrunden, så att användaren slipper sitta och vänta medan AI:n jobbar.',
   }
 
   const coachChatbot = {
-    index: '02',
+    id: 'project-chatbot',
+    index: '01',
     title: 'AI Coach Chatbot',
     tagline:
-      'En GDPR-medveten AI-chatbot för hälsocoaching med lokal LLM, RAG-sökning och realtids-streaming — utan att en enda personuppgift lämnar servern.',
+      'En GDPR-medveten AI-chatbot för hälsocoaching med lokal LLM, RAG-sökning och realtids-streaming, utan att personuppgifter lämnar servern.',
     status: ['Local LLM', 'GDPR by design', 'RAG', 'SSE-streaming'],
     problem:
-      'Probits klienter behövde kunna ställa hälso- och träningsfrågor och få svar från en AI som förstår deras kontext — men hälsodata är känslig. Lösningen fick inte skicka PII till externa API:er, och svaren behövde komma i realtid utan att browsern låste sig.',
+      'Probits ville erbjuda användare en AI där de kan ställa hälso- och träningsfrågor och få svar som förstår deras kontext. Haken: hälsodata är känslig, så lösningen fick inte skicka personuppgifter till externa API:er.',
     role:
-      'Byggdes i samarbete med en kollega. Jag var med i alla tekniska beslut och ansvarade för stora delar av implementationen, säkerhetslagret och backend-arkitekturen.',
+      'Jag var med i alla tekniska beslut och ansvarade för stora delar av implementationen, säkerhetslagret och backend-arkitekturen.',
     flow: [
       { title: 'Användaren skickar ett meddelande' },
-      { title: 'AI Safety Middleware körs först', detail: 'anonymiserar PII (telefon, e-post, personnummer) med spaCy, blockerar prompt injection' },
+      { title: 'AI Safety Middleware körs först', detail: 'anonymiserar personuppgifter som telefonnummer, e-post och personnummer med spaCy, blockerar prompt injection' },
       { title: 'Anonymiserad text går till RAG-pipelinen', detail: 'embeddings (KBLab Swedish BERT) söker i kunskapsdatabasen via pgvector' },
       { title: 'Kontext + meddelande skickas till Ollama', detail: 'lokal LLM genererar svaret' },
       { title: 'Svaret streamar tillbaka via SSE', detail: 'användaren ser texten växa fram i realtid' },
@@ -71,15 +73,11 @@
     challenges: [
       {
         title: 'GDPR by design',
-        body: 'PII anonymiseras innan det når LLM:en. Lokal modell innebär att ingen data skickas till OpenAI eller liknande.',
-      },
-      {
-        title: 'SSE-streaming',
-        body: 'Django hanterar inte streaming naturligt. Kräver en custom view utanför DRF:s normala request/response-cykel.',
+        body: 'Personuppgifter anonymiseras innan de når LLM:en. Lokal modell innebär att ingen data skickas till OpenAI eller liknande.',
       },
       {
         title: 'Stateless auth',
-        body: 'Microservicen har ingen egen användartabell. Varje anrop valideras mot Probits backend, vilket eliminerar en hel klass av dataläckage-risker.',
+        body: 'Microservicen har ingen egen användartabell. Varje anrop valideras mot Probits backend, så det finns ingen lokal användardata som kan läcka.',
       },
       {
         title: 'Throttling & säkerhet',
@@ -91,7 +89,7 @@
       'sentence-transformers', 'Ollama', 'SSE', 'PostgreSQL', 'Docker', 'GitHub Actions',
     ],
     learned:
-      'Att säkerhet inte är något man lägger på efteråt. AI Safety Middleware sitter i request/response-kedjan och körs på varje anrop — det designbeslutet krävde att jag förstod Djangos middleware-pipeline på djupet, inte bara hur man bygger en view.',
+      'Den största lärdomen var att se hur ett helt system hänger ihop och hur alla delar passar in i varandra. Jag fick också tänka på säkerhet och hur lagar och regler som GDPR måste byggas in i arkitekturen från början, inte läggas på i efterhand.',
   }
 </script>
 
@@ -102,8 +100,8 @@
   </header>
 
   <div class="case-list">
-    <CaseStudy {...coachAgent} />
     <CaseStudy {...coachChatbot} />
+    <CaseStudy {...coachAgent} />
   </div>
 </section>
 

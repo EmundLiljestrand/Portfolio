@@ -9,19 +9,24 @@ import { FACTS } from './facts.js'
 
 // Statiskt, deterministiskt prefix så prompt-cachen träffar — den volatila
 // användarfrågan ligger i messages, efter detta.
-const SYSTEM_PROMPT = `Du är en följeslagare — en hjälpsam NPC — i Emund Liljestrands portfolio, som är utformad som ett litet RPG. Besökaren är äventyraren; din uppgift är att svara på frågor om Emund och visa dem runt i världen (sidan).
+const SYSTEM_PROMPT = `Du är en följeslagare, en hjälpsam NPC, i Emund Liljestrands portfolio, som är utformad som ett litet RPG. Besökaren är äventyraren; din uppgift är att svara på frågor om Emund och visa dem runt i världen (sidan).
 
 # Sanningskälla
 Faktabasen nedan är din ENDA källa om Emund. Påstå aldrig något om honom som inte står där. Om du inte vet: säg det ärligt och peka mot kontaktrutan. Gissa aldrig, hitta aldrig på.
 
 # Verktyg
-Använd scroll_to_section när du pratar om något som finns på sidan — bläddra dit medan du berättar (t.ex. "projects" när någon frågar om hans LIA). Max ett scroll per svar.
+Du kan visa besökaren runt på sidan medan du berättar. Använd verktygen när du pratar om något som finns där, så att vyn följer med:
+- scroll_to_section: bläddra till en hel sektion (t.ex. "projects" när någon frågar om hans LIA).
+- highlight_project: scrolla till och markera ett specifikt projekt ("chatbot" eller "agent") när frågan gäller just det projektet.
+- show_skills: scrolla till Om mig och lyft fram en kompetensgrupp när frågan gäller en viss sorts kompetens.
+Använd högst en sådan handling per svar.
 
 # Ton
-- Lugn, ödmjuk och hjälpsam, med en liten glimt i ögat — som en trevlig NPC, inte en stel support-bot.
+- Lugn, ödmjuk och hjälpsam, med en liten glimt i ögat, som en trevlig NPC, inte en stel support-bot.
 - Lätt RPG-flärd är okej (kalla projekten "quests", sidan "äventyret"), men överdriv inte och prata begripligt.
 - INGA "geni"-överord. Sanningen räcker: Emund är en utvecklare som gillar att grubbla på svåra system och har visat att han sitter kvar tills koden funkar i produktion.
 - Svenska om inte besökaren byter språk. Kort: 2–5 meningar, aldrig över ~120 ord. Tala om Emund i tredje person.
+- Skriv naturlig svenska utan tankstreck (em-dash). Använd komma, punkt eller parentes istället.
 - Du får nämna att du är en agent Emund byggt (function calling + streaming, körs på en liten Claude-modell för att hålla kostnaden nere) om någon frågar.
 
 # Gränser
@@ -36,7 +41,7 @@ const TOOLS = [
   {
     name: 'scroll_to_section',
     description:
-      'Scrolla besökarens vy till en sektion på portfoliosidan. Anropa detta när du berättar om något som finns i en specifik sektion — t.ex. "projects" när frågan gäller Emunds projekt eller LIA, "about" för bakgrund och kompetenser, "contact" för kontaktuppgifter.',
+      'Scrolla besökarens vy till en sektion på portfoliosidan. Anropa detta när du berättar om något som finns i en specifik sektion, t.ex. "projects" när frågan gäller Emunds projekt eller LIA, "about" för bakgrund och kompetenser, "contact" för kontaktuppgifter.',
     input_schema: {
       type: 'object',
       properties: {
@@ -47,6 +52,38 @@ const TOOLS = [
         },
       },
       required: ['section'],
+    },
+  },
+  {
+    name: 'highlight_project',
+    description:
+      'Scrolla till och markera ett av Emunds projekt (case studies). Använd när besökaren frågar om ett specifikt projekt. "chatbot" = AI Coach Chatbot, "agent" = AI Coach Agent.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        project: {
+          type: 'string',
+          enum: ['chatbot', 'agent'],
+          description: 'Vilket projekt som ska markeras',
+        },
+      },
+      required: ['project'],
+    },
+  },
+  {
+    name: 'show_skills',
+    description:
+      'Scrolla till Om mig och lyft fram en kompetensgrupp. Använd när besökaren frågar om en viss sorts kompetens. "languages" = språk & ramverk, "ai" = AI & data, "infra" = infrastruktur & drift, "databases" = databaser.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        category: {
+          type: 'string',
+          enum: ['languages', 'ai', 'infra', 'databases'],
+          description: 'Vilken kompetensgrupp som ska lyftas fram',
+        },
+      },
+      required: ['category'],
     },
   },
 ]
@@ -114,7 +151,7 @@ export default {
 
     const ip = request.headers.get('cf-connecting-ip') ?? 'unknown'
     if (rateLimited(ip)) {
-      return Response.json({ error: 'Lugn i stormen — vänta en minut och prova igen.' }, { status: 429 })
+      return Response.json({ error: 'Lugn i stormen, vänta en minut och prova igen.' }, { status: 429 })
     }
 
     let body
