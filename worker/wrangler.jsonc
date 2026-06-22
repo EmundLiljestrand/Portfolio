@@ -7,5 +7,11 @@
   // Modell styrs här — byt utan att röra koden.
   "vars": {
     "MODEL": "claude-sonnet-4-6"
-  }
+  },
+
+  // Frontenden (Pages) anropar /api/* relativt. Den här routen gör att de
+  // anropen på domänen träffar workern; allt annat serveras av Pages.
+  "routes": [
+    { "pattern": "emundliljestrand.com/api/*", "zone_name": "emundliljestrand.com" }
+  ]
 }
