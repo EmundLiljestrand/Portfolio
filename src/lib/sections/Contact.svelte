@@ -1,7 +1,7 @@
 <script>
   import { reveal } from '../actions/reveal.js'
 
-  const email = 'emund.l@hotmail.com'
+  const email = 'emund@emundliljestrand.com'
 
   const links = [
     { label: 'LinkedIn', href: 'https://se.linkedin.com/in/emund-lorch-falch-liljestrand-1b2b77311' },
