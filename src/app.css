@@ -104,6 +104,51 @@ ul, ol {
   letter-spacing: 0.02em;
 }
 
+/* Delat OoT item-grid — kompetenser i Om mig + tech-stack i quests.
+   Globalt så stilarna når Rupee-komponentens svg genom komponentgränsen. */
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--space-2);
+}
+.inv-slot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 2px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--c, var(--green));
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  letter-spacing: 0.02em;
+  transition: border-color 0.1s, box-shadow 0.1s;
+}
+.inv-slot span {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.inv-slot:hover {
+  border-color: var(--c, var(--green));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--c, var(--green)) 40%, transparent);
+}
+.inv-gem {
+  width: 11px;
+  height: 15px;
+  flex-shrink: 0;
+}
+/* Len 3D-flip när man pekar på en slot — gemmen roterar och visar fasetterna */
+.inv-slot:hover .inv-gem {
+  animation: gem-spin 0.9s linear infinite;
+}
+@keyframes gem-spin {
+  from { transform: scale(1.15) rotateY(0); }
+  to   { transform: scale(1.15) rotateY(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inv-slot:hover .inv-gem { animation: none; }
+}
+
 /* Nav.AI:s fé-svans: glödande prickar som spawnas i JS och tonar bort */
 .navi-trail {
   position: fixed;

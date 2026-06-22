@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import gsap from 'gsap'
   import { ScrollTrigger } from 'gsap/ScrollTrigger'
+  import Rupee from './Rupee.svelte'
 
   gsap.registerPlugin(ScrollTrigger)
 
@@ -152,9 +153,12 @@
 
   <div class="case-block">
     <h4 class="block-label pixel">▸ Inventory</h4>
-    <ul class="stack">
+    <ul class="inv-grid">
       {#each stack as tech}
-        <li class="badge" style="--c: {techColor(tech)}">{tech}</li>
+        <li class="inv-slot" style="--c: {techColor(tech)}">
+          <Rupee />
+          <span>{tech}</span>
+        </li>
       {/each}
     </ul>
   </div>
@@ -358,7 +362,7 @@
     gap: var(--space-6);
   }
   .challenge {
-    border-left: 4px solid var(--clay);
+    border-left: 4px solid var(--accent);
     padding: var(--space-2) var(--space-4);
     background: var(--bg-sunken);
   }
@@ -375,29 +379,6 @@
     font-size: var(--text-base);
   }
 
-  .stack {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-3);
-  }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-family: var(--font-ui);
-    font-size: var(--text-base);
-    letter-spacing: 0.03em;
-    padding: 2px var(--space-3);
-    border: 2px solid var(--c);
-    color: var(--text);
-    background: var(--bg-sunken);
-  }
-  .badge::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    background: var(--c);
-  }
 
   .learned {
     border-top: 2px solid var(--border);

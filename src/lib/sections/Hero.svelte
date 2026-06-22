@@ -35,7 +35,7 @@
     <p class="eyebrow"><span class="arrow">▶</span> Webbutvecklare · Kristinehamn</p>
 
     <h1 class="name pixel">
-      Emund<br />Liljestrand<span class="cursor" aria-hidden="true">▮</span>
+      Emund<br />Liljestrand
     </h1>
 
     <p class="lead">
@@ -158,16 +158,6 @@
     margin-bottom: var(--space-6);
   }
 
-  .cursor {
-    color: var(--green);
-    margin-left: 0.1em;
-    animation: blink 1s steps(1) infinite;
-  }
-  @keyframes blink {
-    0%, 50% { opacity: 1; }
-    50.01%, 100% { opacity: 0; }
-  }
-
   .lead {
     font-size: clamp(1.25rem, 2.6vw, 1.625rem);
     font-style: italic;
@@ -248,7 +238,6 @@
       transform: none;
       animation: none;
     }
-    .cursor { animation: none; }
     .hero-portrait { animation: none; }
   }
 </style>

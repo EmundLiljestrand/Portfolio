@@ -1,5 +1,34 @@
 <script>
+  import { onMount } from 'svelte'
+  import gsap from 'gsap'
+  import { ScrollTrigger } from 'gsap/ScrollTrigger'
   import { reveal } from '../actions/reveal.js'
+  import Rupee from '../components/Rupee.svelte'
+
+  gsap.registerPlugin(ScrollTrigger)
+
+  let invEl
+
+  // Item-slotsen "samlas" in en i taget när inventoryt scrollar in i vyn
+  onMount(() => {
+    const slots = invEl.querySelectorAll('.inv-slot')
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce) return
+
+    const ctx = gsap.context(() => {
+      gsap.set(slots, { opacity: 0, scale: 0.5 })
+      gsap.to(slots, {
+        opacity: 1,
+        scale: 1,
+        ease: 'steps(4)',
+        duration: 0.3,
+        stagger: 0.03,
+        scrollTrigger: { trigger: invEl, start: 'top 80%', once: true },
+      })
+    }, invEl)
+
+    return () => ctx.revert()
+  })
 
   const skillGroups = [
     {
@@ -27,6 +56,8 @@
       items: ['PostgreSQL', 'MongoDB', 'Supabase', 'DynamoDB'],
     },
   ]
+
+  const totalSkills = skillGroups.reduce((n, g) => n + g.items.length, 0)
 </script>
 
 <section id="about">
@@ -38,18 +69,21 @@
 
     <div class="about-grid">
       <div class="about-text" use:reveal={{ delay: 0.1 }}>
-        <img
-          class="about-img frame"
-          src="/emund-desk.png"
-          alt="Pixelillustration av Emund vid en retrodator"
-          width="220"
-          height="220"
-        />
-        <p class="lead">
-          Jag är webbutvecklare med en frontend-grund i React, TypeScript och
-          JavaScript. Under min LIA på Probits hamnade jag i något jag inte
-          visste att jag skulle fastna för: backend-arkitektur och AI-system.
-        </p>
+        <div class="about-intro">
+          <img
+            class="about-img frame"
+            src="/emund-desk.png"
+            alt="Pixelillustration av Emund vid en retrodator"
+            width="220"
+            height="220"
+          />
+          <p class="lead">
+            Jag är webbutvecklare med en frontend-grund i React, TypeScript och
+            JavaScript. Under min LIA på Probits hamnade jag i något jag inte
+            visste att jag skulle fastna för: backend-arkitektur och
+            <span class="nb">AI-system</span>.
+          </p>
+        </div>
 
         <p>
           Jag började med JavaScript och React. Sedan dess har jag lärt mig att
@@ -73,14 +107,17 @@
         </p>
       </div>
 
-      <div class="about-skills frame" use:reveal={{ delay: 0.2 }}>
-        <span class="inv-title pixel">▸ Inventory</span>
+      <div class="inventory frame" bind:this={invEl}>
+        <span class="inv-title pixel">▸ Inventory <span class="inv-count">{totalSkills} slots</span></span>
         {#each skillGroups as group}
-          <div class="skill-group" id="skill-{group.key}">
-            <h3 class="skill-label" style="--c: {group.color}">{group.label}</h3>
-            <ul class="skill-list">
+          <div class="inv-group" id="skill-{group.key}" style="--c: {group.color}">
+            <h3 class="inv-label">{group.label}</h3>
+            <ul class="inv-grid">
               {#each group.items as item}
-                <li class="skill" style="--c: {group.color}">{item}</li>
+                <li class="inv-slot">
+                  <Rupee />
+                  <span>{item}</span>
+                </li>
               {/each}
             </ul>
           </div>
@@ -124,10 +161,16 @@
     align-items: start;
   }
 
+  .about-intro {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+  }
+
   .about-text .lead {
     font-size: var(--text-xl);
     color: var(--text);
-    margin-bottom: var(--space-6);
   }
   .about-text p {
     color: var(--muted);
@@ -139,9 +182,8 @@
   }
 
   .about-img {
-    float: left;
-    width: clamp(150px, 32%, 210px);
-    margin: 0 var(--space-6) var(--space-4) 0;
+    flex-shrink: 0;
+    width: clamp(180px, 40%, 270px);
     padding: var(--space-2);
     box-shadow: 5px 5px 0 var(--bg-sunken);
   }
@@ -151,7 +193,7 @@
     }
   }
 
-  .about-skills {
+  .inventory {
     padding: var(--space-8);
   }
 
@@ -164,14 +206,14 @@
     margin-bottom: var(--space-6);
   }
 
-  .skill-group {
+  .inv-group {
     margin-bottom: var(--space-6);
   }
-  .skill-group:last-child {
+  .inv-group:last-child {
     margin-bottom: 0;
   }
 
-  .skill-label {
+  .inv-label {
     font-family: var(--font-ui);
     font-size: var(--text-lg);
     text-transform: uppercase;
@@ -180,29 +222,15 @@
     margin-bottom: var(--space-3);
   }
 
-  .skill-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-
-  .skill {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
+  .inv-count {
     font-family: var(--font-ui);
     font-size: var(--text-base);
     letter-spacing: 0.02em;
-    padding: 1px var(--space-3);
-    border: 2px solid var(--c);
-    color: var(--text);
-    background: var(--bg);
+    color: var(--muted);
   }
-  .skill::before {
-    content: '';
-    width: 7px;
-    height: 7px;
-    background: var(--c);
+
+  .nb {
+    white-space: nowrap;
   }
 
   @media (max-width: 820px) {
