@@ -105,7 +105,8 @@
     font-size: var(--text-xs);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--berry);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--berry) 60%, transparent);
   }
 
   .section-title {

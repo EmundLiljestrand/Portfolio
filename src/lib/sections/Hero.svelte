@@ -108,6 +108,11 @@
     z-index: 1;
     padding: var(--space-2);
     box-shadow: 6px 6px 0 var(--bg-sunken);
+    animation: float 4.5s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
   }
   .hero-portrait img {
     width: clamp(200px, 22vw, 290px);
@@ -244,5 +249,6 @@
       animation: none;
     }
     .cursor { animation: none; }
+    .hero-portrait { animation: none; }
   }
 </style>

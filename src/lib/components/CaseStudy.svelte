@@ -5,9 +5,16 @@
 
   gsap.registerPlugin(ScrollTrigger)
 
-  let { id, index, title, tagline, status = [], problem, role, flow, challenges, stack, learned } = $props()
+  let { id, accent = 'green', index, title, tagline, status = [], problem, role, flow, challenges, stack, learned } = $props()
 
   let flowEl
+  let open = $state(true)
+
+  function toggle() {
+    open = !open
+    // höjden ändras när en quest öppnas/stängs → räkna om scroll-positionerna
+    setTimeout(() => ScrollTrigger.refresh(), 380)
+  }
 
   // Färgkoda teknik-badges efter roll (RPG-inventory)
   function techColor(name) {
@@ -19,8 +26,17 @@
   }
 
   onMount(() => {
+    // Om agenten ber om denna quest medan den är stängd: öppna den först
+    const onHighlight = (e) => {
+      if (e.detail === id && !open) {
+        open = true
+        setTimeout(() => ScrollTrigger.refresh(), 380)
+      }
+    }
+    window.addEventListener('agent:highlight', onHighlight)
+
     const s = getComputedStyle(document.documentElement)
-    const green = s.getPropertyValue('--green').trim() || '#8bd94e'
+    const accentColor = s.getPropertyValue('--' + accent).trim() || '#8bd94e'
     const muted = s.getPropertyValue('--muted').trim() || '#a8b394'
     const border = s.getPropertyValue('--border-strong').trim() || '#6a8a4e'
 
@@ -28,23 +44,23 @@
     const fills = flowEl.querySelectorAll('.flow-line-fill')
 
     const active = {
-      borderColor: green,
-      backgroundColor: green,
+      borderColor: accentColor,
+      backgroundColor: accentColor,
       color: '#11260f',
-      boxShadow: `3px 3px 0 ${muted}33`,
+      boxShadow: `0 0 10px ${accentColor}`,
     }
     const inactive = {
       borderColor: border,
       backgroundColor: 'transparent',
       color: muted,
-      boxShadow: `0 0 0 ${green}00`,
+      boxShadow: `0 0 0 ${accentColor}00`,
     }
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) {
       gsap.set(nodes, active)
       gsap.set(fills, { scaleY: 1 })
-      return
+      return () => window.removeEventListener('agent:highlight', onHighlight)
     }
 
     const ctx = gsap.context(() => {
@@ -62,11 +78,14 @@
       })
     }, flowEl)
 
-    return () => ctx.revert()
+    return () => {
+      window.removeEventListener('agent:highlight', onHighlight)
+      ctx.revert()
+    }
   })
 </script>
 
-<article {id} class="case frame">
+<article {id} class="case frame" style="--accent: var(--{accent})">
   <header class="case-head">
     <span class="case-index pixel">Quest {index}</span>
     <h3 class="case-title pixel">{title}</h3>
@@ -79,7 +98,14 @@
         {/each}
       </ul>
     {/if}
+
+    <button class="case-toggle" type="button" onclick={toggle} aria-expanded={open}>
+      {open ? '▼ Visa mindre' : '▶ Visa mer'}
+    </button>
   </header>
+
+  <div class="case-body" class:open>
+    <div class="case-body-inner">
 
   <div class="case-grid">
     <div class="case-block">
@@ -137,15 +163,63 @@
     <h4 class="block-label pixel">★ Vad jag lärde mig</h4>
     <p>{learned}</p>
   </div>
+
+    </div>
+  </div>
 </article>
 
 <style>
   .case {
+    position: relative;
     padding: clamp(1.5rem, 4vw, 2.75rem);
   }
 
   .case-head {
     margin-bottom: var(--space-12);
+  }
+
+  .case-toggle {
+    position: absolute;
+    top: clamp(1.5rem, 4vw, 2.75rem);
+    right: clamp(1.5rem, 4vw, 2.75rem);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-ui);
+    font-size: var(--text-lg);
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    background: var(--bg-sunken);
+    border: 2px solid var(--border-strong);
+    padding: var(--space-2) var(--space-3);
+    cursor: pointer;
+    transition: border-color 0.1s, color 0.1s, transform 0.1s steps(2);
+  }
+  .case-toggle:hover {
+    border-color: var(--accent);
+    transform: translate(-1px, -1px);
+  }
+  @media (max-width: 640px) {
+    .case-toggle {
+      position: static;
+      margin-top: var(--space-6);
+    }
+  }
+
+  /* Mjuk collapse utan att mäta höjd i JS: grid-rows 1fr <-> 0fr */
+  .case-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease;
+  }
+  .case-body.open {
+    grid-template-rows: 1fr;
+  }
+  .case-body-inner {
+    overflow: hidden;
+    min-height: 0;
   }
 
   .case-index {
@@ -159,7 +233,7 @@
     font-size: clamp(1.1rem, 3vw, 1.75rem);
     line-height: 1.4;
     margin: var(--space-4) 0 var(--space-4);
-    color: var(--green);
+    color: var(--accent);
     text-shadow: 2px 2px 0 var(--bg-sunken);
   }
 
@@ -188,7 +262,7 @@
   .dot {
     width: 9px;
     height: 9px;
-    background: var(--green);
+    background: var(--accent);
     box-shadow: 2px 2px 0 var(--bg-sunken);
   }
 
@@ -259,7 +333,7 @@
   .flow-line-fill {
     position: absolute;
     inset: 0;
-    background: var(--green);
+    background: var(--accent);
     transform: scaleY(0);
     transform-origin: top;
   }

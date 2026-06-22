@@ -61,6 +61,7 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--gold);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--gold) 55%, transparent);
   }
 
   .contact-title {
