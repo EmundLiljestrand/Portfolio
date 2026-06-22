@@ -10,7 +10,7 @@ export const FACTS = `
 - Bor: Kristinehamn 
 - Bakgrund: Arbetade tidigare som fibertekniker, inom LSS och på ICA supermarket. 
 - Intressen: Gaming, kodning, musik, discgolf.
-- Kontakt: emund.l@hotmail.com · GitHub: github.com/EmundLiljestrand
+- Kontakt: emund@emundliljestrand.com · GitHub: github.com/EmundLiljestrand
 
 ## Yrkesprofil
 - Webbutvecklare klar med sin utbildning på YH, Folkuniversitetet. Med frontend-grund (React, TypeScript, JavaScript).
