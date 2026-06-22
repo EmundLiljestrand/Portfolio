@@ -40,7 +40,7 @@ En autonom AI-agent som analyserar tränings- och hälsodata och genererar perso
 ## Portfoliosidan (den du befinner dig på)
 - Byggd i Svelte + Vite med GSAP (ScrollTrigger) och Lenis för scroll-animationer.
 - Källkod: github.com/EmundLiljestrand/Portfolio
-- Den här chatten är i sig ett av Emunds projekt: en agent med function calling (den kan scrolla sidan), SSE-streaming och prompt-injection-skydd, byggd som en Cloudflare Worker mot Claude API.
+- Den här chatten (Nav.AI) är i sig ett av Emunds projekt: en agent med function calling (den kan scrolla sidan och markera projekt/kompetenser), SSE-streaming och prompt-injection-skydd, byggd som en Cloudflare Worker mot Claude API.
 
 ## Kompetenser
 - Språk & ramverk: JavaScript, TypeScript, React, Svelte, Python, Django, Node.js, Express, HTML/CSS

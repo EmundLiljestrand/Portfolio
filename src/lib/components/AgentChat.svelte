@@ -1,7 +1,10 @@
 <script>
   import { onMount } from 'svelte'
+  import { fade } from 'svelte/transition'
 
   let available = $state(false)
+  let nudge = $state(false)     // "Hey! Listen!"-rutan vid sidladdning
+  let hovering = $state(false)
   let open = $state(false)
   let busy = $state(false)
   let draft = $state('')
@@ -9,6 +12,26 @@
 
   let history = [] // Claude API-format — klienten äger loopen
   let listEl = $state()
+  let fabEl = $state()
+  let flownIn = $state(false) // false = grand entré (stor loop), true = snabb swoop tillbaka
+
+  const name = 'Nav.AI' // companion-namnet (visas i FAB-bubblan + paneltiteln) — byt på en rad
+
+  // Navi-svans: spawnar glödande prickar vid féns position under flygturen
+  function emitTrail(duration = 1800) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const start = Date.now()
+    const iv = setInterval(() => {
+      if (!fabEl || Date.now() - start > duration) return clearInterval(iv)
+      const r = fabEl.getBoundingClientRect()
+      const dot = document.createElement('span')
+      dot.className = 'navi-trail'
+      dot.style.left = `${r.left + r.width / 2}px`
+      dot.style.top = `${r.top + r.height / 2}px`
+      document.body.appendChild(dot)
+      setTimeout(() => dot.remove(), 600)
+    }, 55)
+  }
 
   onMount(async () => {
     try {
@@ -16,6 +39,12 @@
       available = res.ok
     } catch {
       available = false
+    }
+    // Navi flyger in (med svans), drar sen uppmärksamhet en gång
+    if (available) {
+      setTimeout(emitTrail, 60)
+      setTimeout(() => (nudge = true), 2100)
+      setTimeout(() => (nudge = false), 7200)
     }
   })
 
@@ -216,13 +245,12 @@
 </script>
 
 {#snippet sprite()}
-  <svg class="sprite" viewBox="0 0 12 12" aria-hidden="true">
-    <rect x="3" y="1" width="6" height="2" fill="#8bd94e" />
-    <rect x="2" y="3" width="8" height="6" fill="#6a8a4e" />
-    <rect x="3" y="3" width="6" height="4" fill="#f2ecd8" />
-    <rect x="4" y="4" width="1" height="2" fill="#16291b" />
-    <rect x="7" y="4" width="1" height="2" fill="#16291b" />
-    <rect x="2" y="9" width="8" height="3" fill="#8bd94e" />
+  <svg class="sprite" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="11" fill="var(--navi)" opacity="0.15" />
+    <ellipse cx="6.5" cy="9" rx="4" ry="6.5" fill="var(--navi)" opacity="0.45" />
+    <ellipse cx="17.5" cy="9" rx="4" ry="6.5" fill="var(--navi)" opacity="0.45" />
+    <circle cx="12" cy="13.5" r="4.5" fill="var(--navi)" />
+    <circle cx="12" cy="13.5" r="2" fill="#f2ffff" />
   </svg>
 {/snippet}
 
@@ -233,18 +261,18 @@
         <header class="panel-head">
           <span class="title">
             {@render sprite()}
-            <span class="pixel">Följeslagaren</span>
+            <span class="title-name">{name}</span>
             <span class="online"></span>
           </span>
-          <button class="close pixel" onclick={() => (open = false)} aria-label="Stäng">✕</button>
+          <button class="close pixel" onclick={() => { open = false; setTimeout(() => emitTrail(1000), 60) }} aria-label="Stäng">✕</button>
         </header>
 
         <div class="list" bind:this={listEl} data-lenis-prevent>
           {#if messages.length === 0}
             <p class="intro">
-              Välkommen, vandrare. Jag är en följeslagare som Emund byggt. Fråga
+              Hej, äventyrare! Jag är {name}, Emunds guide här i världen. Fråga
               mig om hans quests (projekt), hans bakgrund eller kompetenser, så
-              visar jag dig runt i äventyret.
+              visar jag dig vägen.
             </p>
             <div class="starters">
               {#each starters as s}
@@ -283,9 +311,21 @@
         <p class="disclaimer">AI-svar · dela inga personuppgifter här</p>
       </section>
     {:else}
-      <button class="fab pixel" onclick={() => (open = true)} aria-label="Öppna dialogen">
+      <button
+        class="fab"
+        class:returning={flownIn}
+        bind:this={fabEl}
+        onclick={() => { open = true; nudge = false; flownIn = true }}
+        onmouseenter={() => (hovering = true)}
+        onmouseleave={() => (hovering = false)}
+        aria-label="Fråga {name}"
+      >
+        {#if nudge || hovering}
+          <span class="fab-bubble" class:nudge={nudge && !hovering} transition:fade={{ duration: 200 }}>
+            {hovering ? `Fråga ${name}` : 'Hey! Listen!'}
+          </span>
+        {/if}
         {@render sprite()}
-        Fråga följeslagaren
       </button>
     {/if}
   </div>
@@ -300,29 +340,73 @@
   }
 
   .sprite {
-    width: 22px;
-    height: 22px;
-    image-rendering: pixelated;
+    width: 26px;
+    height: 26px;
+    image-rendering: auto;
     flex-shrink: 0;
+    filter: drop-shadow(0 0 4px var(--navi));
+    animation: navi-float 3s ease-in-out infinite;
+  }
+  @keyframes navi-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-3px); }
   }
 
   .fab {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
-    border: 3px solid var(--gold-dim);
-    background: var(--gold);
-    color: #20180a;
-    font-size: var(--text-xs);
-    text-transform: uppercase;
+    background: none;
+    border: none;
+    padding: 0;
     cursor: pointer;
-    box-shadow: 4px 4px 0 var(--bg-sunken);
-    transition: transform 0.1s steps(2), box-shadow 0.1s;
+    /* CSS Motion Path: fén följer en äkta kurva — bézier in, hel cirkel (två bågar),
+       bézier ut. offset-distance följer båglängden så farten blir jämn längs kurvan. */
+    offset-path: path('M -240 -150 C -180 -120 -90 -110 -25 -70 A 85 85 0 0 1 -195 -70 A 85 85 0 0 1 -25 -70 C -12 -45 -6 -18 0 0');
+    offset-rotate: 0deg;
+    offset-anchor: 0 0;
+    animation: navi-fly 1.8s linear both;
   }
-  .fab:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 var(--bg-sunken);
+  @keyframes navi-fly {
+    0%   { offset-distance: 0%; opacity: 0; }
+    6%   { opacity: 1; }
+    100% { offset-distance: 100%; opacity: 1; }
+  }
+  /* Återkomst efter stängd chatt: fén lämnar panel-headern (uppe till vänster)
+     och glider ner-höger till sitt viloläge i hörnet. Snabbare än grand-entrén. */
+  .fab.returning {
+    offset-path: path('M -300 -430 C -90 -405, -330 -50, 0 0');
+    animation-duration: 1s;
+    animation-timing-function: ease-out;
+  }
+  .fab .sprite {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* "Hey! Listen!" / "Fråga Nav.AI" — liten OoT-ruta till vänster om fén */
+  .fab-bubble {
+    position: absolute;
+    right: calc(100% + var(--space-3));
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--navi);
+    background: #0f2733;
+    border: 2px solid var(--navi);
+    padding: var(--space-2) var(--space-3);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--navi) 35%, transparent);
+  }
+  .fab-bubble.nudge {
+    animation: nudge-bob 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes nudge-bob {
+    from { transform: translateY(-50%); }
+    to   { transform: translateY(-50%) translateX(-5px); }
   }
 
   .panel {
@@ -345,15 +429,22 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    font-size: var(--text-xs);
+    font-family: var(--font-ui);
+    font-size: var(--text-lg);
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--green);
+    color: var(--navi);
   }
   .online {
     width: 8px;
     height: 8px;
-    background: var(--green);
-    box-shadow: 0 0 0 2px var(--bg-sunken);
+    background: var(--navi);
+    box-shadow: 0 0 6px var(--navi);
+    animation: navi-pulse 2s ease-in-out infinite;
+  }
+  @keyframes navi-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.4; }
   }
   .close {
     background: none;
@@ -425,13 +516,14 @@
   }
   .msg.assistant {
     align-self: flex-start;
-    border-color: var(--border-strong);
-    background: var(--bg-sunken);
+    border-color: var(--navi);
+    background: #0f2733;
     color: var(--text);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--navi) 20%, transparent);
   }
 
   .log {
-    color: var(--gold);
+    color: var(--navi);
     font-size: var(--text-base);
     letter-spacing: 0.03em;
   }
@@ -494,5 +586,8 @@
   @media (prefers-reduced-motion: reduce) {
     .fab:hover { transform: none; }
     .blink { animation: none; }
+    .sprite, .online { animation: none; }
+    .fab-bubble.nudge { animation: none; }
+    .fab, .fab.returning { animation: none; offset-path: none; }
   }
 </style>

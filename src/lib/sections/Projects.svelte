@@ -4,6 +4,7 @@
 
   const coachAgent = {
     id: 'project-agent',
+    accent: 'sand',
     index: '02',
     title: 'AI Coach Agent',
     tagline:
@@ -53,6 +54,7 @@
 
   const coachChatbot = {
     id: 'project-chatbot',
+    accent: 'blue',
     index: '01',
     title: 'AI Coach Chatbot',
     tagline:
@@ -125,6 +127,7 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--gold);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--gold) 55%, transparent);
   }
 
   .section-title {

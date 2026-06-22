@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Press+Start+2P&family=VT323&display=swap');
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -8,27 +8,30 @@
 }
 
 :root {
-  /* Färg — SNES/Link-to-the-Past-känsla: rik skogsgrön bas, storybook-accenter */
-  --bg:        #1b3326;  /* rik mossgrön (overworld i skugga) */
+  /* Färg — Ocarina of Time möter 2D-pixel. Grönt = världen (Hyrule-fält/skog, basen);
+     medaljongfärgerna = regionaccenter som bryter grönet och ger sektioner egen identitet. */
+  --bg:        #1b3326;  /* Hyrule-fält i skugga (bas) */
   --bg-raised: #244231;  /* upphöjda ytor (kort, paneler) */
   --bg-sunken: #122418;  /* nedsänkta ytor */
-  --text:      #f2ecd8;  /* pergament / fantasybok */
+  --text:      #f2ecd8;  /* pergament */
   --muted:     #a8b394;  /* dämpad salvia */
   --border:    #3c5a40;  /* diskret ram */
   --border-strong: #6a8a4e;
 
-  /* Accentpalett — varje färg har en roll (RPG-UI), mättade men varma */
-  --green: #8bd94e;  /* natur / Link / "klart" */
-  --gold:  #f7cb4d;  /* skatt / interaktivt / länkar */
+  /* Medaljonger (vismännens regioner) — varje sektion/kategori kan "tillhöra" en region */
+  --green: #8bd94e;  /* Skog (Kokiri) — Links tunika, tematisk bas */
+  --gold:  #f7cb4d;  /* Ljus (Rauru) / Triforce — INTERAKTIVT: länkar, knappar */
   --gold-dim: #c79a36;
-  --blue:  #5cc2e6;  /* magi / info / vatten */
-  --clay:  #e6794a;  /* värme / emfas / boss */
-  --berry: #b873d6;  /* magi / AI */
+  --blue:  #5cc2e6;  /* Vatten (Zora) */
+  --clay:  #e0532f;  /* Eld (Goron) — varm röd-orange */
+  --sand:  #e89a3c;  /* Ande (Gerudo) — ökensand/bärnsten */
+  --berry: #b873d6;  /* Skugga (Impa) */
+  --navi:  #8fe8ff;  /* Navi — fé-blå glöd (companion-agenten) */
 
   /* Typografi */
   --font-pixel: 'Press Start 2P', monospace;        /* rubriker/labels — kort text */
   --font-ui:    'VT323', 'Press Start 2P', monospace;/* små UI-texter, läsbar pixel */
-  --font-body:  Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+  --font-body:  'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --text-xs:   0.75rem;
   --text-sm:   0.875rem;
@@ -99,6 +102,68 @@ ul, ol {
   font-family: var(--font-pixel);
   line-height: 1.5;
   letter-spacing: 0.02em;
+}
+
+/* Delat OoT item-grid — kompetenser i Om mig + tech-stack i quests.
+   Globalt så stilarna når Rupee-komponentens svg genom komponentgränsen. */
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--space-2);
+}
+.inv-slot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 2px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--c, var(--green));
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  letter-spacing: 0.02em;
+  transition: border-color 0.1s, box-shadow 0.1s;
+}
+.inv-slot span {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.inv-slot:hover {
+  border-color: var(--c, var(--green));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--c, var(--green)) 40%, transparent);
+}
+.inv-gem {
+  width: 11px;
+  height: 15px;
+  flex-shrink: 0;
+}
+/* Len 3D-flip när man pekar på en slot — gemmen roterar och visar fasetterna */
+.inv-slot:hover .inv-gem {
+  animation: gem-spin 0.9s linear infinite;
+}
+@keyframes gem-spin {
+  from { transform: scale(1.15) rotateY(0); }
+  to   { transform: scale(1.15) rotateY(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inv-slot:hover .inv-gem { animation: none; }
+}
+
+/* Nav.AI:s fé-svans: glödande prickar som spawnas i JS och tonar bort */
+.navi-trail {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background: var(--navi);
+  box-shadow: 0 0 6px var(--navi);
+  pointer-events: none;
+  z-index: 199;
+  animation: navi-trail-fade 0.6s ease-out forwards;
+}
+@keyframes navi-trail-fade {
+  from { opacity: 0.9; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.3); }
 }
 
 /* Tillfällig markering när agenten pekar ut ett element via function calling */
