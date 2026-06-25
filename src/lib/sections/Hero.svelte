@@ -87,8 +87,9 @@
     background-attachment: scroll, fixed;
     background-repeat: no-repeat, no-repeat;
   }
+  /* Mobil: sektionen blir transparent → det fasta mobil-lagret (.page-bg) syns */
   @media (max-width: 768px) {
-    #hero { background-attachment: scroll, scroll; }
+    #hero { background: transparent; }
   }
 
   /* ── Eldflugor ── små glödande motes som svävar */
