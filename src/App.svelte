@@ -19,6 +19,9 @@
   // Boring mode: flippar hela sidan till en ren, ljus, modern vy
   let plain = $state(false)
 
+  // Mobil-bakgrund: vilken sektions scen som visas i det fasta lagret (endast mobil)
+  let activeBg = $state('hero')
+
   function toggleTheme() {
     plain = !plain
     document.documentElement.classList.toggle('plain', plain)
@@ -52,9 +55,33 @@
     }
     window.addEventListener('agent:highlight', onAgentHighlight)
 
+    // Mobil-bakgrund: välj scen efter vilken sektion som ligger vid skärmens
+    // mittlinje (robust även för höga sektioner, till skillnad mot synlig andel)
+    const bgIds = ['hero', 'projects', 'about', 'contact']
+    let bgRaf = 0
+    const updateActiveBg = () => {
+      const mid = window.innerHeight / 2
+      let cur = 'hero'
+      for (const id of bgIds) {
+        const el = document.getElementById(id)
+        if (!el) continue
+        const r = el.getBoundingClientRect()
+        if (r.top <= mid && r.bottom >= mid) { cur = id; break }
+      }
+      activeBg = cur
+    }
+    const onScrollBg = () => {
+      if (bgRaf) return
+      bgRaf = requestAnimationFrame(() => { bgRaf = 0; updateActiveBg() })
+    }
+    window.addEventListener('scroll', onScrollBg, { passive: true })
+    updateActiveBg()
+
     const removeAgentListeners = () => {
       window.removeEventListener('agent:scroll-to', onAgentScroll)
       window.removeEventListener('agent:highlight', onAgentHighlight)
+      window.removeEventListener('scroll', onScrollBg)
+      if (bgRaf) cancelAnimationFrame(bgRaf)
     }
 
     if (reduce) {
@@ -66,8 +93,13 @@
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     })
 
-    // Lenis och ScrollTrigger delar samma loop
-    lenis.on('scroll', ScrollTrigger.update)
+    // Lenis och ScrollTrigger delar samma loop + parallax-drift på mobil-bakgrunden
+    lenis.on('scroll', (e) => {
+      ScrollTrigger.update()
+      const max = document.documentElement.scrollHeight - window.innerHeight
+      const p = max > 0 ? e.scroll / max : 0
+      document.documentElement.style.setProperty('--bg-parallax', `${(0.5 - p) * window.innerHeight * 0.18}px`)
+    })
     const raf = (time) => lenis.raf(time * 1000)
     gsap.ticker.add(raf)
     gsap.ticker.lagSmoothing(0)
@@ -95,6 +127,18 @@
     }
   })
 </script>
+
+{#if !plain}
+  <div class="page-bg" aria-hidden="true">
+    <div class="bg-track">
+      <div class="bg-layer l-hero" class:active={activeBg === 'hero'}></div>
+      <div class="bg-layer l-projects" class:active={activeBg === 'projects'}></div>
+      <div class="bg-layer l-about" class:active={activeBg === 'about'}></div>
+      <div class="bg-layer l-contact" class:active={activeBg === 'contact'}></div>
+    </div>
+    <div class="bg-scrim"></div>
+  </div>
+{/if}
 
 <nav>
   <div class="container nav-inner">
@@ -136,6 +180,50 @@
 {/if}
 
 <style>
+  /* Mobil-bakgrund: fast viewport-lager med parallax + korsfade.
+     Göms på desktop (där sektionerna kör sin egen CSS-bakgrund). */
+  .page-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+    background: var(--bg-sunken);
+  }
+  .bg-track {
+    position: absolute;
+    top: -12%;
+    bottom: -12%;
+    left: 0;
+    right: 0;
+    transform: translate3d(0, var(--bg-parallax, 0px), 0);
+    will-change: transform;
+  }
+  .bg-layer {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .bg-layer.active { opacity: 1; }
+  .l-hero { background-image: url('/bg-hero.webp'); background-position: center top; }
+  .l-projects { background-image: url('/bg-projekt.webp'); background-position: 62% center; }
+  .l-about { background-image: url('/bg-about.webp'); background-position: center; }
+  .l-contact { background-image: url('/bg-kontakt.webp'); background-position: center; }
+  .bg-scrim {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(95% 80% at 50% 38%, rgba(8, 14, 10, 0.4), rgba(8, 14, 10, 0.58));
+  }
+  @media (max-width: 768px) {
+    .page-bg { display: block; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bg-layer { transition: none; }
+  }
+
   nav {
     position: fixed;
     top: 0;

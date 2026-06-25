@@ -71,8 +71,9 @@
     position: relative;
     z-index: 1;
   }
+  /* Mobil: transparent → det fasta mobil-lagret (.page-bg) syns */
   @media (max-width: 768px) {
-    #contact { background-attachment: scroll, scroll; }
+    #contact { background: transparent; }
   }
 
   .section-kicker {
