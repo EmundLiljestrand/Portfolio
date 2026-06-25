@@ -3,13 +3,19 @@
   import gsap from 'gsap'
   import { ScrollTrigger } from 'gsap/ScrollTrigger'
   import Rupee from './Rupee.svelte'
+  import { theme } from '../theme.svelte.js'
+  import { i18n } from '../i18n.svelte.js'
+  import { content } from '../content.js'
+
+  const ui = $derived(content[i18n.lang].caseUi)
 
   gsap.registerPlugin(ScrollTrigger)
 
   let { id, accent = 'green', index, title, tagline, status = [], problem, role, flow, challenges, stack, learned } = $props()
 
   let flowEl
-  let open = $state(true)
+  // I ren/kompakt vy startar questen hopfälld (täta rader); i spelvyn öppen
+  let open = $state(!(typeof document !== 'undefined' && document.documentElement.classList.contains('plain')))
 
   function toggle() {
     open = !open
@@ -36,6 +42,13 @@
     }
     window.addEventListener('agent:highlight', onHighlight)
 
+    // Vid temabyte: fäll ihop i ren vy, fäll ut i spelvy
+    const onTheme = (e) => {
+      open = !e.detail
+      setTimeout(() => ScrollTrigger.refresh(), 380)
+    }
+    window.addEventListener('theme:change', onTheme)
+
     const s = getComputedStyle(document.documentElement)
     const accentColor = s.getPropertyValue('--' + accent).trim() || '#8bd94e'
     const muted = s.getPropertyValue('--muted').trim() || '#a8b394'
@@ -61,7 +74,10 @@
     if (reduce) {
       gsap.set(nodes, active)
       gsap.set(fills, { scaleY: 1 })
-      return () => window.removeEventListener('agent:highlight', onHighlight)
+      return () => {
+        window.removeEventListener('agent:highlight', onHighlight)
+        window.removeEventListener('theme:change', onTheme)
+      }
     }
 
     const ctx = gsap.context(() => {
@@ -81,14 +97,17 @@
 
     return () => {
       window.removeEventListener('agent:highlight', onHighlight)
+      window.removeEventListener('theme:change', onTheme)
       ctx.revert()
     }
   })
 </script>
 
-<article {id} class="case frame" style="--accent: var(--{accent})">
+<article {id} class="case scroll" style="--accent: var(--{accent})">
+  <span class="scroll-rod scroll-rod--top" aria-hidden="true"></span>
+  <div class="scroll-paper">
   <header class="case-head">
-    <span class="case-index pixel">Quest {index}</span>
+    <span class="case-index pixel">{theme.plain ? `${ui.project} ${index}` : `${ui.quest} ${index}`}</span>
     <h3 class="case-title pixel">{title}</h3>
     <p class="case-tagline">{tagline}</p>
 
@@ -101,7 +120,7 @@
     {/if}
 
     <button class="case-toggle" type="button" onclick={toggle} aria-expanded={open}>
-      {open ? '▼ Visa mindre' : '▶ Visa mer'}
+      {theme.plain ? (open ? ui.showLess : ui.showMore) : (open ? ui.rollUp : ui.unroll)}
     </button>
   </header>
 
@@ -110,17 +129,17 @@
 
   <div class="case-grid">
     <div class="case-block">
-      <h4 class="block-label pixel">▸ Problemet</h4>
+      <h4 class="block-label pixel">{theme.plain ? ui.problemPlain : ui.problem}</h4>
       <p>{problem}</p>
     </div>
     <div class="case-block">
-      <h4 class="block-label pixel">▸ Min roll</h4>
+      <h4 class="block-label pixel">{theme.plain ? ui.rolePlain : ui.role}</h4>
       <p>{role}</p>
     </div>
   </div>
 
   <div class="case-block">
-    <h4 class="block-label pixel">▸ Så fungerar det</h4>
+    <h4 class="block-label pixel">{theme.plain ? ui.howPlain : ui.how}</h4>
     <ol class="flow" bind:this={flowEl}>
       {#each flow as step, i}
         <li class="flow-step">
@@ -140,7 +159,7 @@
   </div>
 
   <div class="case-block">
-    <h4 class="block-label pixel">▸ Tekniska utmaningar</h4>
+    <h4 class="block-label pixel">{theme.plain ? ui.challengesPlain : ui.challenges}</h4>
     <ul class="challenges">
       {#each challenges as c}
         <li class="challenge">
@@ -152,7 +171,7 @@
   </div>
 
   <div class="case-block">
-    <h4 class="block-label pixel">▸ Inventory</h4>
+    <h4 class="block-label pixel">{theme.plain ? ui.techPlain : ui.tech}</h4>
     <ul class="inv-grid">
       {#each stack as tech}
         <li class="inv-slot" style="--c: {techColor(tech)}">
@@ -164,19 +183,71 @@
   </div>
 
   <div class="learned">
-    <h4 class="block-label pixel">★ Vad jag lärde mig</h4>
+    <h4 class="block-label pixel">{theme.plain ? ui.learnedPlain : ui.learned}</h4>
     <p>{learned}</p>
   </div>
 
     </div>
   </div>
+  </div>
+  <span class="scroll-rod scroll-rod--bottom" aria-hidden="true"></span>
 </article>
 
 <style>
   .case {
     position: relative;
-    padding: clamp(1.5rem, 4vw, 2.75rem);
   }
+
+  /* Pergamentrulle: trästavar i topp/botten, varmt åldrat papper emellan.
+     När den rullas ihop kryper bottenstaven upp mot rubriken. */
+  .scroll-paper {
+    position: relative;
+    padding: clamp(1.5rem, 4vw, 2.75rem);
+    background-color: #2c2417;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0 2px, transparent 2px 4px),
+      radial-gradient(120% 80% at 50% 0%, rgba(247, 203, 77, 0.07), transparent 60%),
+      linear-gradient(180deg, #332a18, #2a2214);
+    border-left: 3px solid #15110a;
+    border-right: 3px solid #15110a;
+    box-shadow:
+      inset 0 0 44px rgba(0, 0, 0, 0.45),
+      inset 0 0 0 1px rgba(247, 203, 77, 0.08);
+  }
+
+  .scroll-rod {
+    display: block;
+    position: relative;
+    height: 32px;
+    margin-inline: -10px;
+    z-index: 2;
+    background: linear-gradient(
+      to bottom,
+      #1b130a 0%,
+      #6e4f22 20%,
+      #a9772f 40%,
+      #e0b15c 50%,
+      #a9772f 60%,
+      #6e4f22 80%,
+      #1b130a 100%
+    );
+    border: 2px solid #100b06;
+  }
+  /* runda knoppar i ändarna på staven */
+  .scroll-rod::before,
+  .scroll-rod::after {
+    content: "";
+    position: absolute;
+    top: -6px;
+    bottom: -6px;
+    width: 18px;
+    background: linear-gradient(to bottom, #1b130a, #c79a36 50%, #1b130a);
+    border: 2px solid #100b06;
+  }
+  .scroll-rod::before { left: -14px; }
+  .scroll-rod::after { right: -14px; }
+  .scroll-rod--top { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.45); }
+  .scroll-rod--bottom { box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.45); }
 
   .case-head {
     margin-bottom: var(--space-12);

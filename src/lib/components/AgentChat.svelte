@@ -1,6 +1,8 @@
 <script>
   import { onMount } from 'svelte'
   import { fade } from 'svelte/transition'
+  import { i18n } from '../i18n.svelte.js'
+  import { content } from '../content.js'
 
   let available = $state(false)
   let nudge = $state(false)     // "Hey! Listen!"-rutan vid sidladdning
@@ -16,6 +18,9 @@
   let flownIn = $state(false) // false = grand entré (stor loop), true = snabb swoop tillbaka
 
   const name = 'Nav.AI' // companion-namnet (visas i FAB-bubblan + paneltiteln) — byt på en rad
+
+  const ag = $derived(content[i18n.lang].agent)
+  const groups = $derived(content[i18n.lang].about.groups)
 
   // Navi-svans: spawnar glödande prickar vid féns position under flygturen
   function emitTrail(duration = 1800) {
@@ -56,30 +61,19 @@
 
   const PROJECT_IDS = { chatbot: 'project-chatbot', agent: 'project-agent' }
   const PROJECT_NAMES = { chatbot: 'AI Coach Chatbot', agent: 'AI Coach Agent' }
-  const SKILL_NAMES = {
-    languages: 'Språk & ramverk',
-    ai: 'AI & Data',
-    infra: 'Infrastruktur & drift',
-    databases: 'Databaser',
-  }
 
-  function toolFlavor(name, input) {
-    if (name === 'scroll_to_section') {
-      const map = {
-        hero: 'startskärmen',
-        projects: 'Quest Log',
-        about: 'karaktärsbladet',
-        contact: 'kontaktrutan',
-      }
-      return `▸ Bläddrar till ${map[input?.section] ?? input?.section}...`
+  function toolFlavor(toolName, input) {
+    const fill = (tmpl, target) => tmpl.replace('{target}', target)
+    if (toolName === 'scroll_to_section') {
+      return fill(ag.toolScroll, ag.sections[input?.section] ?? input?.section)
     }
-    if (name === 'highlight_project') {
-      return `▸ Pekar ut ${PROJECT_NAMES[input?.project] ?? input?.project}...`
+    if (toolName === 'highlight_project') {
+      return fill(ag.toolHighlight, PROJECT_NAMES[input?.project] ?? input?.project)
     }
-    if (name === 'show_skills') {
-      return `▸ Öppnar ${SKILL_NAMES[input?.category] ?? input?.category} i ryggsäcken...`
+    if (toolName === 'show_skills') {
+      return fill(ag.toolSkills, groups[input?.category] ?? input?.category)
     }
-    return '▸ Letar i ryggsäcken...'
+    return ag.toolSearch
   }
 
   function runTool(name, input) {
@@ -114,11 +108,11 @@
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ messages: history }),
+      body: JSON.stringify({ messages: history, lang: i18n.lang }),
     })
     if (!res.ok) {
       const err = await res.json().catch(() => null)
-      throw new Error(err?.error ?? 'Följeslagaren svarar inte just nu.')
+      throw new Error(err?.error ?? ag.errorOffline)
     }
 
     messages.push({ role: 'assistant', text: '' })
@@ -158,7 +152,7 @@
       }
     }
 
-    if (!done) throw new Error('Förbindelsen bröts.')
+    if (!done) throw new Error(ag.errorBroken)
 
     // Tomt assistant-svar (rent tool-svar) → ta bort den tomma bubblan
     if (!bubble.text) messages = messages.filter((m) => m !== bubble)
@@ -215,7 +209,7 @@
     } catch (err) {
       messages.push({
         role: 'system',
-        text: `${err.message} Maila gärna istället, se kontaktrutan.`,
+        text: `${err.message}${ag.errorTail}`,
       })
     } finally {
       busy = false
@@ -230,13 +224,7 @@
     }
   }
 
-  // Startfrågor i tomma rutan: tar bort "blank ruta"-tröskeln och guidar besökaren
-  const starters = [
-    'Vad har Emund byggt?',
-    'Vilka kompetenser har han?',
-    'Berätta om hans bakgrund',
-    'Hur når jag honom?',
-  ]
+  // Startfrågor (ag.starters) tar bort "blank ruta"-tröskeln och guidar besökaren
   function ask(q) {
     if (busy) return
     draft = q
@@ -269,13 +257,9 @@
 
         <div class="list" bind:this={listEl} data-lenis-prevent>
           {#if messages.length === 0}
-            <p class="intro">
-              Hej, äventyrare! Jag är {name}, Emunds guide här i världen. Fråga
-              mig om hans quests (projekt), hans bakgrund eller kompetenser, så
-              visar jag dig vägen.
-            </p>
+            <p class="intro">{ag.intro.replace('{name}', name)}</p>
             <div class="starters">
-              {#each starters as s}
+              {#each ag.starters as s}
                 <button type="button" class="starter" onclick={() => ask(s)}>{s}</button>
               {/each}
             </div>
@@ -288,7 +272,7 @@
             {/if}
           {/each}
           {#if busy && messages[messages.length - 1]?.text === ''}
-            <div class="log">▸ tänker<span class="blink">_</span></div>
+            <div class="log">▸ {ag.thinking}<span class="blink">_</span></div>
           {/if}
         </div>
 
@@ -301,14 +285,14 @@
         >
           <textarea
             rows="1"
-            placeholder="Skriv ditt svar…"
+            placeholder={ag.placeholder}
             bind:value={draft}
             onkeydown={onKeydown}
             disabled={busy}
           ></textarea>
           <button type="submit" class="pixel" disabled={busy || !draft.trim()}>OK</button>
         </form>
-        <p class="disclaimer">AI-svar · dela inga personuppgifter här</p>
+        <p class="disclaimer">{ag.disclaimer}</p>
       </section>
     {:else}
       <button
@@ -322,7 +306,7 @@
       >
         {#if nudge || hovering}
           <span class="fab-bubble" class:nudge={nudge && !hovering} transition:fade={{ duration: 200 }}>
-            {hovering ? `Fråga ${name}` : 'Hey! Listen!'}
+            {hovering ? ag.ask.replace('{name}', name) : 'Hey! Listen!'}
           </span>
         {/if}
         {@render sprite()}

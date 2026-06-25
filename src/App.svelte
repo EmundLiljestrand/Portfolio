@@ -9,10 +9,26 @@
   import About   from './lib/sections/About.svelte'
   import Contact from './lib/sections/Contact.svelte'
   import AgentChat from './lib/components/AgentChat.svelte'
+  import { i18n } from './lib/i18n.svelte.js'
+  import { content } from './lib/content.js'
 
   gsap.registerPlugin(ScrollTrigger)
 
+  const nav = $derived(content[i18n.lang].nav)
+
+  // Boring mode: flippar hela sidan till en ren, ljus, modern vy
+  let plain = $state(false)
+
+  function toggleTheme() {
+    plain = !plain
+    document.documentElement.classList.toggle('plain', plain)
+    try { localStorage.setItem('theme', plain ? 'plain' : 'game') } catch (e) {}
+    window.dispatchEvent(new CustomEvent('theme:change', { detail: plain }))
+    ScrollTrigger.refresh()
+  }
+
   onMount(() => {
+    plain = document.documentElement.classList.contains('plain')
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     // Agenten ber om scroll via event; App äger beteendet. Default är native
@@ -83,11 +99,28 @@
 <nav>
   <div class="container nav-inner">
     <span class="nav-logo pixel">EL</span>
-    <ul class="nav-links">
-      <li><a href="#projects">Projekt</a></li>
-      <li><a href="#about">Om mig</a></li>
-      <li><a href="#contact">Kontakt</a></li>
-    </ul>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="#projects">{nav.projects}</a></li>
+        <li><a href="#about">{nav.about}</a></li>
+        <li><a href="#contact">{nav.contact}</a></li>
+      </ul>
+      <button
+        class="lang-toggle"
+        onclick={() => i18n.toggle()}
+        title={i18n.lang === 'sv' ? 'Switch to English' : 'Byt till svenska'}
+      >
+        {i18n.lang === 'sv' ? 'EN' : 'SV'}
+      </button>
+      <button
+        class="theme-toggle"
+        onclick={toggleTheme}
+        aria-pressed={plain}
+        title={plain ? 'Gå tillbaka till den interaktiva vyn' : 'Byt till en ren, professionell vy'}
+      >
+        {plain ? '✦ Enter the world' : '[Esc] to reality'}
+      </button>
+    </div>
   </div>
 </nav>
 
@@ -98,7 +131,9 @@
   <Contact />
 </main>
 
-<AgentChat />
+{#if !plain}
+  <AgentChat />
+{/if}
 
 <style>
   nav {
@@ -141,6 +176,63 @@
 
   .nav-links a:hover {
     color: var(--gold);
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  /* Diskret språkknapp (mindre framträdande än tema-toggeln) */
+  .lang-toggle {
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    background: transparent;
+    border: 2px solid var(--border-strong);
+    padding: var(--space-1) var(--space-2);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .lang-toggle:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+
+  /* Guld-accentknapp som drar fokus mot de dämpade nav-länkarna */
+  .theme-toggle {
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #20180a;
+    background: var(--gold);
+    border: 2px solid var(--gold-dim);
+    padding: var(--space-2) var(--space-4);
+    cursor: pointer;
+    box-shadow: 0 0 12px color-mix(in srgb, var(--gold) 55%, transparent);
+    transition: transform 0.1s steps(2), box-shadow 0.15s, background 0.15s;
+    animation: toggle-glow 2.8s ease-in-out infinite;
+  }
+  .theme-toggle:hover {
+    transform: translate(-1px, -1px);
+    background: color-mix(in srgb, var(--gold) 90%, #fff);
+    box-shadow:
+      4px 4px 0 var(--bg-sunken),
+      0 0 18px color-mix(in srgb, var(--gold) 75%, transparent);
+  }
+  @keyframes toggle-glow {
+    0%, 100% { box-shadow: 0 0 10px color-mix(in srgb, var(--gold) 40%, transparent); }
+    50%      { box-shadow: 0 0 18px color-mix(in srgb, var(--gold) 75%, transparent); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .theme-toggle { animation: none; }
+  }
+
+  @media (max-width: 520px) {
+    .nav-links { display: none; }
   }
 
   main {

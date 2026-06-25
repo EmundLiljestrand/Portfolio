@@ -167,6 +167,12 @@ export default {
       return Response.json({ error: invalid }, { status: 400 })
     }
 
+    // Svara på besökarens språk (sidan skickar 'sv' eller 'en')
+    const langDirective =
+      body.lang === 'en'
+        ? 'IMPORTANT: The visitor is using the English version of the site. Reply only in natural, fluent English, regardless of any earlier instruction to write Swedish. Keep the same friendly companion tone.'
+        : 'Svara på naturlig svenska.'
+
     const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
     const { readable, writable } = new TransformStream()
     const writer = writable.getWriter()
@@ -182,6 +188,10 @@ export default {
                 type: 'text',
                 text: SYSTEM_PROMPT,
                 cache_control: { type: 'ephemeral' },
+              },
+              {
+                type: 'text',
+                text: langDirective,
               },
             ],
             tools: TOOLS,
