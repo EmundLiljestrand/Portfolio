@@ -31,5 +31,3 @@ worker/.dev.vars
 *.njsproj
 *.sln
 *.sw?
-
-BUILDPLAN.md

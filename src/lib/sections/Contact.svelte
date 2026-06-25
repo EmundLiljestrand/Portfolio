@@ -1,5 +1,10 @@
 <script>
   import { reveal } from '../actions/reveal.js'
+  import { theme } from '../theme.svelte.js'
+  import { i18n } from '../i18n.svelte.js'
+  import { content } from '../content.js'
+
+  const ct = $derived(content[i18n.lang].contact)
 
   const email = 'emund@emundliljestrand.com'
 
@@ -11,17 +16,14 @@
   const year = new Date().getFullYear()
 </script>
 
-<section id="contact" class="container">
-  <div class="contact-inner" use:reveal>
-    <span class="section-kicker pixel">✦ Kontakt</span>
-    <h2 class="contact-title pixel">Hör av dig</h2>
-    <p class="contact-lead">
-      Jag är öppen för nya uppdrag och svarar snabbt. Gäller det ett jobb eller
-      bara en fråga? Skriv en rad, så hörs vi.
-    </p>
+<section id="contact">
+  <div class="container contact-inner" use:reveal>
+    <span class="section-kicker pixel">{theme.plain ? ct.kicker : '✦ ' + ct.kicker}</span>
+    <h2 class="contact-title pixel">{ct.title}</h2>
+    <p class="contact-lead">{ct.lead}</p>
 
     <a class="email frame" href="mailto:{email}">
-      <span class="pixel email-tag">▸ Skicka meddelande</span>
+      <span class="pixel email-tag">{theme.plain ? ct.emailTagPlain : '▸ ' + ct.emailTag}</span>
       <span class="email-addr">{email}</span>
     </a>
 
@@ -46,14 +48,31 @@
     target="_blank"
     rel="noreferrer"
   >
-    Byggd i Svelte · se källkoden ↗
+    {ct.footer}
   </a>
 </footer>
 
 <style>
   #contact {
+    position: relative;
+    overflow: hidden;
     padding-block: var(--space-32);
     border-top: 2px solid var(--border);
+    /* Pixel-art-bakgrund (månbelyst sjö) + scrim, fast → parallax */
+    background-image:
+      radial-gradient(78% 92% at 50% 50%, rgba(10, 18, 12, 0.5), rgba(10, 18, 12, 0.28)),
+      url('/bg-kontakt.webp');
+    background-size: cover, cover;
+    background-position: center, center;
+    background-attachment: scroll, fixed;
+    background-repeat: no-repeat, no-repeat;
+  }
+  #contact > .container {
+    position: relative;
+    z-index: 1;
+  }
+  @media (max-width: 768px) {
+    #contact { background-attachment: scroll, scroll; }
   }
 
   .section-kicker {
@@ -62,6 +81,11 @@
     text-transform: uppercase;
     color: var(--gold);
     text-shadow: 0 0 10px color-mix(in srgb, var(--gold) 55%, transparent);
+  }
+
+  /* text ligger direkt på sjöbilden → starkare skugga för säker läsbarhet */
+  .contact-inner {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
   }
 
   .contact-title {
@@ -74,16 +98,18 @@
 
   .contact-lead {
     font-size: var(--text-lg);
-    color: var(--muted);
+    color: var(--text);
     max-width: 50ch;
     margin-bottom: var(--space-12);
   }
 
   /* Mejl som ett pixel-ramat "dialogval" */
   .email {
-    display: inline-flex;
+    display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: var(--space-2);
+    max-width: 100%;
     padding: var(--space-4) var(--space-6);
     color: var(--text);
     transition: transform 0.1s steps(2), box-shadow 0.1s;
@@ -99,9 +125,11 @@
   }
   .email-addr {
     font-family: var(--font-ui);
-    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-size: clamp(1.05rem, 5vw, 2.25rem);
     color: var(--text);
     letter-spacing: 0.02em;
+    max-width: 100%;
+    overflow-wrap: anywhere;
   }
 
   .links {

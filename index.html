@@ -2,35 +2,40 @@
 <html lang="sv">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Applicera sparat tema direkt (innan paint) så vyn inte blinkar
+      try { if (localStorage.getItem('theme') === 'plain') document.documentElement.classList.add('plain'); } catch (e) {}
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <title>Emund Liljestrand — Webbutvecklare</title>
+    <title>Emund Liljestrand — Webbutvecklare · Web Developer</title>
     <meta
       name="description"
-      content="Webbutvecklare i Kristinehamn. Jag löser problem oavsett var i stacken lösningen sitter: AI-system, backend-arkitektur och modern frontend i Svelte."
+      content="Webbutvecklare i Kristinehamn · Web developer based in Sweden. AI systems, backend architecture and modern frontend in Svelte."
     />
     <meta name="theme-color" content="#1b3326" />
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="sv_SE" />
+    <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:url" content="https://emundliljestrand.com" />
-    <meta property="og:title" content="Emund Liljestrand — Webbutvecklare" />
+    <meta property="og:title" content="Emund Liljestrand — Webbutvecklare · Web Developer" />
     <meta
       property="og:description"
-      content="Webbutvecklare i Kristinehamn. AI-system, backend-arkitektur och modern frontend i Svelte."
+      content="Web developer based in Sweden. AI systems, backend architecture and modern frontend in Svelte."
     />
     <meta property="og:image" content="https://emundliljestrand.com/emund-portrait.png" />
     <meta property="og:image:width" content="300" />
     <meta property="og:image:height" content="300" />
-    <meta property="og:image:alt" content="Pixelporträtt av Emund Liljestrand" />
+    <meta property="og:image:alt" content="Pixel portrait of Emund Liljestrand" />
 
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Emund Liljestrand — Webbutvecklare" />
+    <meta name="twitter:title" content="Emund Liljestrand — Webbutvecklare · Web Developer" />
     <meta
       name="twitter:description"
-      content="Webbutvecklare i Kristinehamn. AI-system, backend-arkitektur och modern frontend i Svelte."
+      content="Web developer based in Sweden. AI systems, backend architecture and modern frontend in Svelte."
     />
     <meta name="twitter:image" content="https://emundliljestrand.com/emund-portrait.png" />
   </head>

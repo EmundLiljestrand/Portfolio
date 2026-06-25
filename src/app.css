@@ -31,7 +31,7 @@
   /* Typografi */
   --font-pixel: 'Press Start 2P', monospace;        /* rubriker/labels — kort text */
   --font-ui:    'VT323', 'Press Start 2P', monospace;/* små UI-texter, läsbar pixel */
-  --font-body:  'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body:  'VT323', 'Courier New', monospace; /* retro brödtext i spelvyn */
 
   --text-xs:   0.75rem;
   --text-sm:   0.875rem;
@@ -66,12 +66,27 @@ html {
 
 body {
   font-family: var(--font-body);
-  font-size: var(--text-base);
-  line-height: 1.7;
+  font-size: var(--text-lg); /* VT323 ser mindre ut → lite större bas */
+  line-height: 1.5;
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Diskret djup-gradient som laddnings-backdrop bakom sektionerna
+   (sektionernas bilder täcker den så fort de laddats). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(135% 95% at 50% -12%,
+      color-mix(in srgb, var(--bg) 55%, #3d6850) 0%,
+      var(--bg) 44%,
+      var(--bg-sunken) 100%);
 }
 
 /* Pixelgrafik ska behålla skarpa kanter */
@@ -188,3 +203,159 @@ ul, ol {
     inset 0 0 0 3px var(--border);
   background: var(--bg-raised);
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   BORING MODE — ren, ljus, modern vy. <html class="plain"> aktiverar den.
+   Visar att samma innehåll kan presenteras minimalistiskt och proffsigt.
+   ════════════════════════════════════════════════════════════════════════ */
+html.plain {
+  color-scheme: light;
+  --bg:        #f6f5f1;
+  --bg-raised: #ffffff;
+  --bg-sunken: #eeece5;
+  --text:      #1b2330;
+  --muted:     #5c6573;
+  --border:    #e4e1d8;
+  --border-strong: #cfcabd;
+  --green: #2f7d4f;
+  --gold:  #9c7518;
+  --gold-dim: #7d5d12;
+  --blue:  #2f6fb0;
+  --berry: #8a4fb0;
+  --clay:  #c0492a;
+  --sand:  #b3741f;
+  --navi:  #2f8fb0;
+  /* ren sans överallt i ren vy (släpp båda retro-typsnitten) */
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-pixel: var(--font-body);
+  --font-ui:    var(--font-body);
+}
+html.plain body { font-size: var(--text-base); line-height: 1.65; }
+
+/* ta bort djup-backdrop i ren vy */
+html.plain body::before { display: none !important; }
+
+/* platta ut alla sektioners pixel-art-bakgrunder */
+html.plain #hero,
+html.plain #projects,
+html.plain #about,
+html.plain #contact {
+  background: var(--bg) !important;
+}
+
+/* inga text-skuggor/glow i ren vy */
+html.plain .name,
+html.plain .lead,
+html.plain .body,
+html.plain .eyebrow,
+html.plain .section-title,
+html.plain .section-kicker,
+html.plain .case-title,
+html.plain .contact-title,
+html.plain .nav-logo { text-shadow: none !important; }
+
+html.plain .body { color: var(--muted); }
+html.plain .about-text,
+html.plain .contact-inner { text-shadow: none !important; }
+
+/* dölj dekorativa rörelselager */
+html.plain .hero-fireflies { display: none !important; }
+
+/* mjuka kort istället för pixel-ramar */
+html.plain .frame {
+  border: 1px solid var(--border) !important;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  background: var(--bg-raised);
+}
+html.plain .hero-portrait {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* case-studies: göm trästavarna, gör pappret till ett rent kort */
+html.plain .scroll-rod { display: none !important; }
+html.plain .scroll-paper {
+  background: var(--bg-raised) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* inventory-slots som lätta chips */
+html.plain .inv-slot {
+  background: var(--bg-raised);
+  border-width: 1px;
+  border-radius: 8px;
+}
+
+/* knappar och toggle får mjuka hörn */
+html.plain .btn,
+html.plain .theme-toggle,
+html.plain .case-toggle,
+html.plain .email { border-radius: 8px; }
+html.plain .theme-toggle {
+  border-width: 1px;
+  animation: none !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+}
+html.plain .theme-toggle:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* nav blir ljus */
+html.plain nav {
+  background: color-mix(in srgb, var(--bg) 90%, transparent) !important;
+}
+
+/* ── Kompakt CV-layout: dra ihop allt, liten header, täta sektioner ── */
+
+/* hero → kompakt rubrikband (ingen fullskärm) */
+html.plain #hero {
+  min-height: auto !important;
+  padding-block: var(--space-12) var(--space-8) !important;
+}
+html.plain .hero-grid { gap: var(--space-8); align-items: center; }
+html.plain .name {
+  font-size: clamp(1.6rem, 4vw, 2.25rem) !important;
+  margin-bottom: var(--space-2) !important;
+}
+html.plain .eyebrow { font-size: var(--text-base) !important; margin-bottom: var(--space-2) !important; }
+html.plain .lead { font-size: var(--text-lg) !important; margin-bottom: var(--space-3) !important; }
+html.plain #hero .body { font-size: var(--text-base); margin-bottom: var(--space-4); }
+html.plain .hero-portrait { animation: none !important; }
+html.plain .hero-portrait img { width: clamp(110px, 13vw, 150px) !important; }
+
+/* tätare sektioner och rubriker */
+html.plain #projects,
+html.plain #about,
+html.plain #contact { padding-block: var(--space-16) !important; }
+html.plain .section-head { margin-bottom: var(--space-8) !important; }
+html.plain .section-title { font-size: clamp(1.1rem, 2.6vw, 1.5rem) !important; }
+
+/* case-studies som täta kort */
+html.plain .case-list { gap: var(--space-8) !important; }
+html.plain .scroll-paper { padding: var(--space-6) !important; }
+html.plain .case-head { margin-bottom: var(--space-4) !important; }
+html.plain .case-block { margin-bottom: var(--space-6) !important; }
+html.plain .case-grid { gap: var(--space-6) !important; margin-bottom: var(--space-6) !important; }
+html.plain .case-title { margin: var(--space-2) 0 !important; }
+
+/* om mig tätare */
+html.plain .about-grid { gap: var(--space-8) !important; }
+html.plain .about-text p { margin-bottom: var(--space-3); }
+html.plain .inventory { padding: var(--space-6) !important; }
+
+/* dölj dekorativ skrivbordsillustration i kompakt vy */
+html.plain .about-img { display: none !important; }
+
+/* skills som rena CV-taggar (inga gems, inline-radbrytning) */
+html.plain .inv-grid {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: var(--space-2) !important;
+}
+html.plain .inv-slot { padding: 3px 10px; }
+html.plain .inv-gem { display: none; }
+html.plain .inv-slot:hover { box-shadow: none; }

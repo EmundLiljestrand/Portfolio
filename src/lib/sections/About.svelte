@@ -4,6 +4,11 @@
   import { ScrollTrigger } from 'gsap/ScrollTrigger'
   import { reveal } from '../actions/reveal.js'
   import Rupee from '../components/Rupee.svelte'
+  import { theme } from '../theme.svelte.js'
+  import { i18n } from '../i18n.svelte.js'
+  import { content } from '../content.js'
+
+  const a = $derived(content[i18n.lang].about)
 
   gsap.registerPlugin(ScrollTrigger)
 
@@ -35,7 +40,7 @@
       key: 'languages',
       label: 'Språk & ramverk',
       color: 'var(--green)',
-      items: ['JavaScript', 'TypeScript', 'React', 'Svelte', 'Python', 'Django', 'Node.js', 'Express', 'HTML/CSS'],
+      items: ['JavaScript', 'TypeScript', 'React', 'Svelte', 'Node.js', 'Express', 'Python', 'Django', 'HTML/CSS', 'REST APIs'],
     },
     {
       key: 'ai',
@@ -47,13 +52,25 @@
       key: 'infra',
       label: 'Infrastruktur & drift',
       color: 'var(--gold)',
-      items: ['Docker', 'Nginx', 'GitHub Actions', 'Safespring (OpenStack)', 'AWS'],
+      items: ['Docker', 'Nginx', 'Cloudflare (Workers/Pages)', 'Safespring (OpenStack)', 'AWS', 'Linux', 'GitHub Actions'],
     },
     {
       key: 'databases',
       label: 'Databaser',
       color: 'var(--blue)',
       items: ['PostgreSQL', 'MongoDB', 'Supabase', 'DynamoDB'],
+    },
+    {
+      key: 'tools',
+      label: 'Verktyg & arbetssätt',
+      color: 'var(--sand)',
+      items: ['Git', 'GitHub', 'Azure DevOps', 'Agile/Scrum'],
+    },
+    {
+      key: 'design',
+      label: 'Design & UX',
+      color: 'var(--clay)',
+      items: ['UX/UI', 'Responsiv design'],
     },
   ]
 
@@ -63,8 +80,8 @@
 <section id="about">
   <div class="container">
     <header class="section-head" use:reveal>
-      <span class="section-kicker pixel">✦ Om mig</span>
-      <h2 class="section-title pixel">Problemlösaren i systemet</h2>
+      <span class="section-kicker pixel">{theme.plain ? a.kicker : '✦ ' + a.kicker}</span>
+      <h2 class="section-title pixel">{a.title}</h2>
     </header>
 
     <div class="about-grid">
@@ -77,41 +94,22 @@
             width="220"
             height="220"
           />
-          <p class="lead">
-            Jag är webbutvecklare med en frontend-grund i React, TypeScript och
-            JavaScript. Under min LIA på Probits hamnade jag i något jag inte
-            visste att jag skulle fastna för: backend-arkitektur och
-            <span class="nb">AI-system</span>.
-          </p>
+          <p class="lead">{a.leadPre}<span class="nb">{a.leadNb}</span>{a.leadPost}</p>
         </div>
 
-        <p>
-          Jag började med JavaScript och React. Sedan dess har jag lärt mig att
-          bygga autonoma AI-agenter, köra lokala språkmodeller på GPU och förstå
-          hur ett större system faktiskt fungerar: inloggning och säkerhet,
-          asynkrona köer, hur olika tjänster pratar med varandra, och GDPR-krav
-          som formar hela arkitekturen.
-        </p>
-
-        <p>
-          Det jag drivs av är att förstå hela bilden och veta varför något
-          fungerar, inte bara att få det att gå. Helst sitter jag med problem
-          som spänner över flera lager och kräver att man ser hur delarna spelar
-          ihop.
-        </p>
-
-        <p>
-          Nu söker jag mitt nästa kliv som utvecklare. Jag är öppen för det mesta
-          och vill framför allt fortsätta växa och lösa riktiga problem. Att få
-          jobba mer med AI lockar, men det är ett plus snarare än ett krav.
-        </p>
+        <p>{a.p2}</p>
+        <p>{a.p3}</p>
+        <p>{a.p4}</p>
       </div>
 
       <div class="inventory frame" bind:this={invEl}>
-        <span class="inv-title pixel">▸ Inventory <span class="inv-count">{totalSkills} slots</span></span>
+        <span class="inv-title pixel">
+          {theme.plain ? a.invTitlePlain : '▸ ' + a.invTitle}
+          {#if !theme.plain}<span class="inv-count">{totalSkills} {a.slots}</span>{/if}
+        </span>
         {#each skillGroups as group}
           <div class="inv-group" id="skill-{group.key}" style="--c: {group.color}">
-            <h3 class="inv-label">{group.label}</h3>
+            <h3 class="inv-label">{a.groups[group.key]}</h3>
             <ul class="inv-grid">
               {#each group.items as item}
                 <li class="inv-slot">
@@ -129,9 +127,25 @@
 
 <style>
   #about {
+    position: relative;
+    overflow: hidden;
     padding-block: var(--space-32);
     border-top: 2px solid var(--border);
-    background: var(--bg-sunken);
+    /* Pixel-art-bakgrund (förtrollad skog) + scrim, fast → parallax */
+    background-image:
+      radial-gradient(78% 92% at 50% 50%, rgba(10, 18, 12, 0.52), rgba(10, 18, 12, 0.3)),
+      url('/bg-about.webp');
+    background-size: cover, cover;
+    background-position: center, center;
+    background-attachment: scroll, fixed;
+    background-repeat: no-repeat, no-repeat;
+  }
+  #about > .container {
+    position: relative;
+    z-index: 1;
+  }
+  @media (max-width: 768px) {
+    #about { background-attachment: scroll, scroll; }
   }
 
   .section-head {
@@ -168,12 +182,16 @@
     margin-bottom: var(--space-6);
   }
 
+  /* text ligger direkt på skogsbilden → ljus färg + skugga för stark läsbarhet */
+  .about-text {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  }
   .about-text .lead {
     font-size: var(--text-xl);
     color: var(--text);
   }
   .about-text p {
-    color: var(--muted);
+    color: var(--text);
     margin-bottom: var(--space-6);
     max-width: 60ch;
   }
