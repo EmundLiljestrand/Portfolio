@@ -208,9 +208,11 @@
     transition: opacity 0.6s ease;
   }
   .bg-layer.active { opacity: 1; }
+  /* Mobil-lagret är bara synligt på mobil → stående beskärningar för de
+     scener vars liggande version zoomar fult (Projekt, Om mig). */
   .l-hero { background-image: url('/bg-hero.webp'); background-position: center top; }
-  .l-projects { background-image: url('/bg-projekt.webp'); background-position: 62% center; }
-  .l-about { background-image: url('/bg-about.webp'); background-position: center; }
+  .l-projects { background-image: url('/bg-projekt-m.webp'); background-position: center; }
+  .l-about { background-image: url('/bg-about-m.webp'); background-position: center; }
   .l-contact { background-image: url('/bg-kontakt.webp'); background-position: center; }
   .bg-scrim {
     position: absolute;
